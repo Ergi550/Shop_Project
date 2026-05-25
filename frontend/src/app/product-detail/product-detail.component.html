@@ -1,0 +1,250 @@
+<app-layout [solidNav]="true">
+
+  @if (loading()) {
+    <!-- Loading skeleton -->
+    <div class="pt-20 md:pt-28 pb-16 px-4 md:px-8 max-w-[1440px] mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 mt-8">
+        <div class="aspect-[3/4] animate-pulse" style="background-color: #E8E4DD;"></div>
+        <div class="space-y-4">
+          <div class="h-4 w-1/4 rounded animate-pulse" style="background-color: #E8E4DD;"></div>
+          <div class="h-10 w-3/4 rounded animate-pulse" style="background-color: #E8E4DD;"></div>
+          <div class="h-6 w-1/4 rounded animate-pulse" style="background-color: #E8E4DD;"></div>
+        </div>
+      </div>
+    </div>
+
+  } @else if (!product()) {
+    <div class="pt-32 pb-24 px-4 text-center">
+      <p class="text-2xl text-gray-400" style="font-family: Cormorant, serif;">Product not found.</p>
+      <a routerLink="/shop" class="mt-6 inline-block text-xs tracking-[0.2em] uppercase border-b border-black pb-1">
+        Back to Shop
+      </a>
+    </div>
+
+  } @else {
+
+    <!-- ===================== BREADCRUMB ===================== -->
+    <div class="pt-20 md:pt-28 pb-4 md:pb-6 px-4 md:px-8 max-w-[1440px] mx-auto">
+      <nav class="flex gap-2 text-xs tracking-[0.2em] uppercase text-gray-400 overflow-x-auto scrollbar-none whitespace-nowrap">
+        <a routerLink="/" class="hover:text-black transition-colors shrink-0">Home</a>
+        <span>/</span>
+        <a routerLink="/shop" class="hover:text-black transition-colors shrink-0">Shop</a>
+        <span>/</span>
+        <a [routerLink]="['/category', product()!.category.slug]" class="hover:text-black transition-colors shrink-0">
+          {{ product()!.category.name }}
+        </a>
+        <span>/</span>
+        <span class="text-black truncate">{{ product()!.name }}</span>
+      </nav>
+    </div>
+
+    <!-- ===================== MAIN PRODUCT SECTION ===================== -->
+    <div class="px-4 md:px-8 pb-16 md:pb-24 max-w-[1440px] mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16">
+
+        <!-- LEFT: Images -->
+        <div>
+          <div class="aspect-[3/4] overflow-hidden mb-3 md:mb-4" style="background-color: #E8E4DD;">
+            <img [src]="activeImage()" [alt]="product()!.name"
+                 class="w-full h-full object-cover transition-opacity duration-300" />
+          </div>
+          <div class="flex gap-2 md:gap-3 overflow-x-auto scrollbar-none">
+            @for (img of images(); track $index) {
+              <button (click)="activeImageIndex.set($index)"
+                      class="w-16 h-20 md:w-20 md:h-24 shrink-0 overflow-hidden transition-all duration-200 border"
+                      [class.border-black]="activeImageIndex() === $index"
+                      [class.border-transparent]="activeImageIndex() !== $index">
+                <img [src]="img" [alt]="product()!.name + ' view ' + ($index + 1)"
+                     class="w-full h-full object-cover" />
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- RIGHT: Product info -->
+        <div class="flex flex-col">
+          <p class="text-xs tracking-[0.3em] uppercase text-gray-400 mb-2 md:mb-3">AURELIA</p>
+          <h1 class="text-3xl md:text-5xl tracking-wide mb-3 md:mb-4" style="font-family: Cormorant, serif; font-weight: 400;">
+            {{ product()!.name }}
+          </h1>
+          <p class="text-xl md:text-2xl mb-8 md:mb-10" style="font-family: Cormorant, serif;">€ {{ product()!.price }}</p>
+
+          <!-- Color selector -->
+          @if (colors().length > 0) {
+            <div class="mb-6 md:mb-8">
+              <div class="flex items-center gap-2 mb-3 md:mb-4">
+                <span class="text-xs tracking-[0.2em] uppercase">Colour</span>
+                @if (selectedColor()) {
+                  <span class="text-xs text-gray-400">— {{ selectedColor() }}</span>
+                }
+              </div>
+              <div class="flex gap-3 flex-wrap">
+                @for (color of colors(); track color.name) {
+                  <button
+                    (click)="selectColor(color.name)"
+                    [title]="color.name"
+                    class="w-8 h-8 rounded-full border-2 transition-all duration-200"
+                    [class.border-black]="selectedColor() === color.name"
+                    [class.border-transparent]="selectedColor() !== color.name"
+                    [class.opacity-30]="!isColorAvailable(color.name)"
+                    [class.cursor-not-allowed]="!isColorAvailable(color.name)"
+                    [style.background-color]="color.hex"
+                    [style.box-shadow]="color.hex === '#FFFFFF' ? 'inset 0 0 0 1px #ddd' : 'none'">
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Size selector -->
+          <div class="mb-6 md:mb-8">
+            <div class="flex items-center justify-between mb-3 md:mb-4">
+              <span class="text-xs tracking-[0.2em] uppercase">Size</span>
+              <a href="#" class="text-xs tracking-wider text-gray-400 underline hover:text-black transition-colors">
+                Size Guide
+              </a>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              @for (size of sizes(); track size) {
+                <button
+                  (click)="selectSize(size)"
+                  class="w-12 h-12 md:w-14 md:h-14 text-sm tracking-wide border transition-all duration-200"
+                  [class.bg-black]="selectedSize() === size"
+                  [class.text-white]="selectedSize() === size"
+                  [class.border-black]="selectedSize() === size"
+                  [class.bg-white]="selectedSize() !== size"
+                  [class.text-black]="selectedSize() !== size"
+                  [class.border-black\/20]="selectedSize() !== size && isSizeAvailable(size)"
+                  [class.opacity-30]="!isSizeAvailable(size)"
+                  [class.cursor-not-allowed]="!isSizeAvailable(size)"
+                  [class.line-through]="!isSizeAvailable(size)">
+                  {{ size }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Quantity -->
+          <div class="mb-8 md:mb-10">
+            <p class="text-xs tracking-[0.2em] uppercase mb-3 md:mb-4">Quantity</p>
+            <div class="flex items-center border border-black/20 w-fit">
+              <button (click)="decrement()"
+                      class="w-11 h-11 md:w-12 md:h-12 flex items-center justify-center hover:bg-black/5 transition-colors text-lg">−</button>
+              <span class="w-11 h-11 md:w-12 md:h-12 flex items-center justify-center text-sm border-x border-black/20">{{ quantity() }}</span>
+              <button (click)="increment()"
+                      class="w-11 h-11 md:w-12 md:h-12 flex items-center justify-center hover:bg-black/5 transition-colors text-lg">+</button>
+            </div>
+          </div>
+
+          <!-- CTA buttons -->
+          <div class="flex flex-col gap-3 mb-8 md:mb-10">
+            <button (click)="addToCart()"
+                    class="w-full py-4 md:py-5 text-xs md:text-sm tracking-[0.2em] uppercase transition-all duration-300"
+                    [class.bg-black]="!addedToCart()"
+                    [class.text-white]="!addedToCart()"
+                    [style.background-color]="addedToCart() ? '#C9A962' : ''"
+                    [style.color]="addedToCart() ? 'white' : ''">
+              {{ addedToCart() ? 'Added to Cart ✓' : 'Add to Cart' }}
+            </button>
+            <button (click)="addToWishlist()"
+                    class="w-full py-4 md:py-5 text-xs md:text-sm tracking-[0.2em] uppercase border border-black/20 hover:border-black transition-colors duration-300"
+                    [style.border-color]="isInWishlist() ? '#C9A962' : ''"
+                    [style.color]="isInWishlist() ? '#C9A962' : ''">
+              {{ isInWishlist() ? 'Saved to Wishlist ♡' : 'Add to Wishlist' }}
+            </button>
+          </div>
+
+          <p class="text-xs text-gray-400 tracking-wider text-center">
+            Complimentary shipping on orders over €250 · Free returns within 14 days
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== DESCRIPTION / DETAILS TABS ===================== -->
+    <div class="border-t border-black/10 px-4 md:px-8 pb-16 md:pb-24" style="background-color: #FAF8F5;">
+      <div class="max-w-[1440px] mx-auto">
+        <div class="flex gap-4 sm:gap-8 md:gap-12 border-b border-black/10 mb-8 md:mb-12 overflow-x-auto scrollbar-none">
+          @for (tab of [
+            { key: 'description', label: 'Description' },
+            { key: 'materials',   label: 'Materials & Care' },
+            { key: 'care',        label: 'Shipping & Returns' }
+          ]; track tab.key) {
+            <button (click)="activeTab.set($any(tab.key))"
+                    class="py-5 md:py-6 text-xs tracking-[0.2em] uppercase border-b-2 -mb-px transition-colors duration-200 whitespace-nowrap shrink-0"
+                    [class.border-black]="activeTab() === tab.key"
+                    [class.text-black]="activeTab() === tab.key"
+                    [class.border-transparent]="activeTab() !== tab.key"
+                    [class.text-gray-400]="activeTab() !== tab.key">
+              {{ tab.label }}
+            </button>
+          }
+        </div>
+
+        <div class="max-w-xl">
+          @if (activeTab() === 'description') {
+            <p class="text-base leading-relaxed text-gray-700 tracking-wide" style="font-family: Cormorant, serif; font-size: 1.05rem;">
+              {{ product()!.description }}
+            </p>
+          }
+          @if (activeTab() === 'materials') {
+            <div class="space-y-6 text-sm text-gray-700 leading-relaxed tracking-wide">
+              <div>
+                <p class="text-xs tracking-[0.2em] uppercase text-black mb-2">Composition</p>
+                <p>Premium natural fibres selected for quality, drape, and longevity.</p>
+              </div>
+              <div>
+                <p class="text-xs tracking-[0.2em] uppercase text-black mb-2">Care</p>
+                <p>Dry clean or hand wash in cold water. Store flat or on a padded hanger away from direct sunlight.</p>
+              </div>
+            </div>
+          }
+          @if (activeTab() === 'care') {
+            <div class="space-y-6 text-sm text-gray-700 leading-relaxed tracking-wide">
+              <div>
+                <p class="text-xs tracking-[0.2em] uppercase text-black mb-2">Delivery</p>
+                <p>Complimentary standard delivery on all orders over €250. Express delivery available at checkout. Orders are dispatched within 1–2 business days.</p>
+              </div>
+              <div>
+                <p class="text-xs tracking-[0.2em] uppercase text-black mb-2">Returns</p>
+                <p>Free returns within 14 days of receipt. Items must be unworn, unwashed, and in original packaging with all tags attached.</p>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== YOU MAY ALSO LIKE ===================== -->
+    <div class="px-4 md:px-8 py-16 md:py-24">
+      <div class="max-w-[1440px] mx-auto">
+        <h2 class="text-2xl md:text-3xl tracking-[0.15em] uppercase mb-8 md:mb-12 text-center" style="font-family: Cormorant, serif; font-weight: 400;">
+          You May Also Like
+        </h2>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+          @for (item of [
+            { slug: 'linen-wrap-dress',    name: 'Linen Wrap Dress',    price: 290,
+              img: 'https://images.unsplash.com/photo-1566174053879-31528523f8ae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600' },
+            { slug: 'evening-gown-noir',   name: 'Evening Gown Noir',   price: 620,
+              img: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600' },
+            { slug: 'silk-blouse-ivory',   name: 'Silk Blouse Ivory',   price: 195,
+              img: 'https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600' },
+            { slug: 'cashmere-knit-top',   name: 'Cashmere Knit Top',   price: 245,
+              img: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600' }
+          ]; track item.slug) {
+            <a [routerLink]="['/product', item.slug]" class="group block">
+              <div class="aspect-[3/4] overflow-hidden mb-3" style="background-color: #E8E4DD;">
+                <img [src]="item.img" [alt]="item.name"
+                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+              </div>
+              <p class="text-sm md:text-base tracking-wide" style="font-family: Cormorant, serif;">{{ item.name }}</p>
+              <p class="text-xs md:text-sm text-gray-500 mt-1">€ {{ item.price }}</p>
+            </a>
+          }
+        </div>
+      </div>
+    </div>
+
+  }
+
+</app-layout>

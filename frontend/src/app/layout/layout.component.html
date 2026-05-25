@@ -1,0 +1,178 @@
+<div class="min-h-screen bg-white">
+  <!-- ===================== NAVIGATION ===================== -->
+  <nav
+    class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+    [class.bg-white]="navDark"
+    [class.shadow-sm]="navDark"
+    [class.bg-transparent]="!navDark"
+  >
+    <div class="mx-auto px-4 md:px-8 py-4 md:py-6 flex items-center justify-between max-w-[1440px]">
+      <!-- Left -->
+      <div class="flex items-center gap-4 md:gap-8">
+        <button (click)="openMenu()" class="flex items-center gap-1.5 md:gap-2 hover:opacity-60 transition-opacity">
+          <svg class="w-5 h-5" [class.text-black]="navDark" [class.text-white]="!navDark"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+          <span class="hidden sm:inline text-sm tracking-wider" [class.text-black]="navDark" [class.text-white]="!navDark">MENU</span>
+        </button>
+        <button (click)="openSearch()" class="flex items-center gap-1.5 md:gap-2 hover:opacity-60 transition-opacity">
+          <svg class="w-5 h-5" [class.text-black]="navDark" [class.text-white]="!navDark"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <span class="hidden sm:inline text-sm tracking-wider" [class.text-black]="navDark" [class.text-white]="!navDark">SEARCH</span>
+        </button>
+      </div>
+
+      <!-- Center brand -->
+      <div class="absolute left-1/2 -translate-x-1/2">
+        <a routerLink="/" class="text-xl md:text-3xl tracking-[0.3em]" [class.text-black]="navDark" [class.text-white]="!navDark"
+           style="font-family: Cormorant, serif; font-weight: 400;">AURELIA</a>
+      </div>
+
+      <!-- Right -->
+      <div class="flex items-center gap-4 md:gap-6">
+        <a routerLink="/wishlist" class="hover:opacity-60 transition-opacity" aria-label="Wishlist">
+          <svg class="w-5 h-5" [class.text-black]="navDark" [class.text-white]="!navDark"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+        </a>
+        <a routerLink="/login" class="hidden sm:block hover:opacity-60 transition-opacity" aria-label="Account">
+          <svg class="w-5 h-5" [class.text-black]="navDark" [class.text-white]="!navDark"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+          </svg>
+        </a>
+        <a routerLink="/cart" class="relative hover:opacity-60 transition-opacity" aria-label="Cart">
+          <svg class="w-5 h-5" [class.text-black]="navDark" [class.text-white]="!navDark"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" />
+          </svg>
+          @if (cart.itemCount() > 0) {
+            <span class="absolute -top-2 -right-2 h-4 w-4 md:h-5 md:w-5 flex items-center justify-center text-xs text-white rounded-full"
+                  style="background-color: #C9A962;">{{ cart.itemCount() }}</span>
+          }
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===================== SLIDE-OUT MENU PANEL ===================== -->
+  <div class="fixed inset-0 z-40 bg-black/40 transition-opacity duration-300"
+       [class.opacity-100]="menuOpen()" [class.pointer-events-auto]="menuOpen()"
+       [class.opacity-0]="!menuOpen()" [class.pointer-events-none]="!menuOpen()"
+       (click)="closeMenu()"></div>
+
+  <aside class="fixed top-0 left-0 bottom-0 z-50 w-full max-w-xs sm:max-w-md bg-white transition-transform duration-500 ease-in-out"
+         [class.translate-x-0]="menuOpen()" [class.-translate-x-full]="!menuOpen()">
+    <div class="p-6 md:p-10 h-full flex flex-col overflow-y-auto">
+      <button (click)="closeMenu()" class="self-end mb-8 md:mb-12 hover:opacity-60 transition-opacity" aria-label="Close menu">
+        <svg class="w-6 h-6 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+      <nav class="flex flex-col gap-5">
+        @for (cat of categories; track cat.slug) {
+          <a [routerLink]="['/category', cat.slug]" (click)="closeMenu()"
+             class="text-xl md:text-2xl tracking-[0.15em] uppercase hover:opacity-50 transition-opacity"
+             style="font-family: Cormorant, serif;">{{ cat.name }}</a>
+        }
+      </nav>
+      <div class="mt-auto pt-8 border-t border-black/10 flex flex-col gap-4 text-sm tracking-wider uppercase text-gray-600">
+        <a routerLink="/login" (click)="closeMenu()" class="hover:text-black transition-colors">Account</a>
+        <a routerLink="/wishlist" (click)="closeMenu()" class="hover:text-black transition-colors">Wishlist</a>
+        <a href="#" class="hover:text-black transition-colors">Contact Us</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===================== SEARCH PANEL ===================== -->
+  <div class="fixed inset-0 z-40 bg-black/40 transition-opacity duration-300"
+       [class.opacity-100]="searchOpen()" [class.pointer-events-auto]="searchOpen()"
+       [class.opacity-0]="!searchOpen()" [class.pointer-events-none]="!searchOpen()"
+       (click)="closeSearch()"></div>
+
+  <div class="fixed top-0 left-0 right-0 z-50 bg-white transition-transform duration-500 ease-in-out"
+       [class.translate-y-0]="searchOpen()" [class.-translate-y-full]="!searchOpen()">
+    <div class="max-w-[1440px] mx-auto px-4 md:px-8 py-6 md:py-12">
+      <div class="flex items-center justify-between mb-6 md:mb-8">
+        <span class="text-sm tracking-[0.2em] uppercase text-gray-500">Search</span>
+        <button (click)="closeSearch()" class="hover:opacity-60 transition-opacity" aria-label="Close search">
+          <svg class="w-6 h-6 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <input type="text" placeholder="What are you looking for?"
+             class="w-full border-b border-black/30 pb-3 md:pb-4 text-xl md:text-3xl bg-transparent focus:outline-none focus:border-black transition-colors"
+             style="font-family: Cormorant, serif;" />
+      <div class="mt-6 flex flex-wrap gap-3 text-sm tracking-wider uppercase text-gray-500">
+        <span class="text-gray-400">Popular:</span>
+        <a routerLink="/category/dresses" (click)="closeSearch()" class="hover:text-black transition-colors">Dresses</a>
+        <a routerLink="/category/new-arrivals" (click)="closeSearch()" class="hover:text-black transition-colors">New In</a>
+        <a routerLink="/category/sale" (click)="closeSearch()" class="hover:text-black transition-colors">Sale</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PAGE CONTENT ===================== -->
+  <main>
+    <ng-content></ng-content>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="text-white py-12 md:py-16 px-4 md:px-8" style="background-color: #2C2C2C;">
+    <div class="max-w-[1440px] mx-auto">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 mb-12 md:mb-16">
+        <div>
+          <h3 class="text-sm tracking-[0.2em] uppercase mb-5 md:mb-6">Shop</h3>
+          <ul class="space-y-3">
+            <li><a routerLink="/category/new-arrivals" class="text-sm text-gray-400 hover:text-white transition-colors">New Arrivals</a></li>
+            <li><a routerLink="/category/dresses" class="text-sm text-gray-400 hover:text-white transition-colors">Dresses</a></li>
+            <li><a routerLink="/category/tops" class="text-sm text-gray-400 hover:text-white transition-colors">Tops</a></li>
+            <li><a routerLink="/category/shoes" class="text-sm text-gray-400 hover:text-white transition-colors">Shoes</a></li>
+            <li><a routerLink="/category/accessories" class="text-sm text-gray-400 hover:text-white transition-colors">Accessories</a></li>
+            <li><a routerLink="/category/sale" class="text-sm text-gray-400 hover:text-white transition-colors">Sale</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-sm tracking-[0.2em] uppercase mb-5 md:mb-6">Help</h3>
+          <ul class="space-y-3">
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Customer Service</a></li>
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Shipping &amp; Returns</a></li>
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Size Guide</a></li>
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Track Order</a></li>
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Contact Us</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-sm tracking-[0.2em] uppercase mb-5 md:mb-6">About</h3>
+          <ul class="space-y-3">
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Our Story</a></li>
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Sustainability</a></li>
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Careers</a></li>
+            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Press</a></li>
+          </ul>
+        </div>
+        <div class="col-span-2 md:col-span-1">
+          <h3 class="text-sm tracking-[0.2em] uppercase mb-5 md:mb-6">Newsletter</h3>
+          <p class="text-sm text-gray-400 mb-4">Subscribe for updates and exclusive deals.</p>
+          <div class="flex gap-2">
+            <input type="email" placeholder="Enter your email"
+                   class="bg-white/10 border border-white/20 text-white placeholder:text-gray-500 h-11 px-3 flex-1 min-w-0" />
+            <button class="text-white px-4 md:px-6 h-11 shrink-0" style="background-color: #C9A962;">Subscribe</button>
+          </div>
+        </div>
+      </div>
+      <div class="border-t border-white/10 pt-8 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <p class="text-sm text-gray-500">© 2026 Aurelia. All rights reserved.</p>
+        <div class="flex gap-6">
+          <a href="#" class="text-sm text-gray-500 hover:text-white transition-colors">Privacy Policy</a>
+          <a href="#" class="text-sm text-gray-500 hover:text-white transition-colors">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>

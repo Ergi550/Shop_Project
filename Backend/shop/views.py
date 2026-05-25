@@ -1,5 +1,7 @@
 from rest_framework import generics, permissions
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.contrib.auth.models import User
 from django.db import transaction
 from .models import Category, Product, ProductVariant, Order, OrderItem
 from .serializers import (
@@ -11,9 +13,15 @@ from .serializers import (
 
 
 class ProductListView(generics.ListAPIView):
-    queryset = Product.objects.filter(available=True)
     serializer_class = ProductSerializer
     permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        qs = Product.objects.filter(available=True).select_related('category').prefetch_related('variants')
+        category_slug = self.request.query_params.get('category')
+        if category_slug:
+            qs = qs.filter(category__slug=category_slug)
+        return qs
 
 
 class ProductDetailView(generics.RetrieveAPIView):
@@ -67,3 +75,34 @@ class OrderCreateView(generics.CreateAPIView):
             )
 
         return Response(self.get_serializer(order).data, status=201)
+
+
+class RegisterView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        username = request.data.get('username') or request.data.get('email')
+        email = request.data.get('email', '')
+        password = request.data.get('password', '')
+        first_name = request.data.get('first_name', '')
+        last_name = request.data.get('last_name', '')
+
+        if not username or not password:
+            return Response({'detail': 'Username and password required.'}, status=400)
+        if User.objects.filter(username=username).exists():
+            return Response({'detail': 'Username already taken.'}, status=400)
+
+        user = User.objects.create_user(
+            username=username, email=email, password=password,
+            first_name=first_name, last_name=last_name,
+        )
+        return Response({'id': user.id, 'username': user.username, 'email': user.email}, status=201)
+
+
+class MeView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        u = request.user
+        return Response({'id': u.id, 'username': u.username, 'email': u.email,
+                         'first_name': u.first_name, 'last_name': u.last_name})

@@ -1,0 +1,81 @@
+<app-layout>
+
+  <!-- ===================== HERO ===================== -->
+  <section class="relative h-screen w-full">
+    <div class="absolute inset-0 overflow-hidden">
+      <video #heroVideo class="w-full h-full object-cover" autoplay muted loop playsinline
+             poster="https://images.unsplash.com/photo-1613915617430-8ab0fd7c6baf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080">
+        <source src="assets/hero.mp4" type="video/mp4" />
+      </video>
+      <div class="absolute inset-0 bg-black/20"></div>
+    </div>
+
+    <div class="relative h-full flex items-end justify-center pb-16 md:pb-24 px-4">
+      <div class="text-center text-white space-y-3 md:space-y-4">
+        <p class="text-xs md:text-sm tracking-[0.3em] uppercase">Women</p>
+        <h2 class="text-4xl sm:text-5xl md:text-7xl tracking-wide" style="font-family: Cormorant, serif; font-weight: 400;">
+          Summer Collection
+        </h2>
+        <a routerLink="/shop" class="inline-block text-xs md:text-sm tracking-wider uppercase border-b border-white pb-1 hover:opacity-70 transition-opacity">
+          Discover the collection
+        </a>
+      </div>
+    </div>
+
+    <button (click)="togglePlay(heroVideo)"
+            class="absolute bottom-6 right-6 md:bottom-8 md:right-8 w-9 h-9 md:w-10 md:h-10 rounded-full border border-white/50 flex items-center justify-center text-white hover:bg-white/10 transition-all">
+      @if (isPlaying()) {
+        <svg class="w-3 h-3 md:w-4 md:h-4" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" /><rect x="14" y="4" width="4" height="16" /></svg>
+      } @else {
+        <svg class="w-3 h-3 md:w-4 md:h-4 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+      }
+    </button>
+  </section>
+
+  <!-- ===================== CATEGORY GRID ===================== -->
+  <section class="py-16 md:py-24 px-4 md:px-8" style="background-color: #FAF8F5;">
+    <div class="max-w-[1440px] mx-auto">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-12">
+        @for (category of categories; track category.id) {
+          <a [routerLink]="['/category', category.slug]" class="group block">
+            <div class="aspect-[3/4] overflow-hidden mb-3 md:mb-6" style="background-color: #E8E4DD;">
+              <img [src]="category.imageUrl" [alt]="category.name"
+                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+            </div>
+            <p class="text-center text-sm md:text-base tracking-[0.2em] uppercase" style="font-family: Cormorant, serif;">
+              {{ category.name }}
+            </p>
+          </a>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FEATURE BANNER ===================== -->
+  <section class="relative w-full h-[320px] sm:h-[450px] md:h-[600px]">
+    <div class="absolute inset-0 bg-cover bg-center" [style.background-image]="'url(' + featureImageUrl + ')'">
+      <div class="absolute inset-0 bg-black/20"></div>
+    </div>
+    <div class="relative h-full flex flex-col items-center justify-center text-center text-white px-4 md:px-8">
+      <p class="text-2xl sm:text-3xl md:text-4xl mb-4 md:mb-6 max-w-2xl tracking-wide" style="font-family: Cormorant, serif; font-weight: 300;">
+        {{ featureCaption }}
+      </p>
+      <a href="#" class="text-xs md:text-sm tracking-wider uppercase border-b border-white pb-1 hover:opacity-70 transition-opacity">
+        {{ featureCtaText }}
+      </a>
+    </div>
+  </section>
+
+  <!-- ===================== PROMO ===================== -->
+  <section class="py-16 md:py-24 px-4 md:px-8 text-center" style="background-color: #FAF8F5;">
+    <div class="max-w-[1440px] mx-auto">
+      <h2 class="text-4xl md:text-6xl mb-6 md:mb-8 tracking-wide" style="font-family: Cormorant, serif; font-weight: 400;">Up to 50% Off</h2>
+      <p class="text-base md:text-xl tracking-[0.15em] uppercase mb-8 md:mb-10" style="font-family: Cormorant, serif;">Mid-Season Sale</p>
+      <a routerLink="/category/sale"
+         class="inline-block bg-black text-white hover:bg-black/80 px-10 md:px-12 py-4 text-xs md:text-sm tracking-[0.2em] uppercase transition-colors">
+        Shop the Sale
+      </a>
+    </div>
+  </section>
+
+</app-layout>

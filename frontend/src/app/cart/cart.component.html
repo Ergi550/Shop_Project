@@ -1,0 +1,148 @@
+<app-layout [solidNav]="true">
+
+  <div class="pt-24 md:pt-32 pb-16 md:pb-24 px-4 md:px-8 min-h-screen" style="background-color: #FAF8F5;">
+    <div class="max-w-[1440px] mx-auto">
+
+      <h1 class="text-4xl md:text-5xl tracking-wide mb-1 md:mb-2" style="font-family: Cormorant, serif; font-weight: 400;">
+        Your Bag
+      </h1>
+      <p class="text-sm text-gray-400 tracking-wider mb-10 md:mb-16">
+        {{ itemCount() }} {{ itemCount() === 1 ? 'item' : 'items' }}
+      </p>
+
+      @if (items().length === 0) {
+        <div class="flex flex-col items-center justify-center py-24 md:py-32 text-center">
+          <svg class="w-14 h-14 md:w-16 md:h-16 text-gray-200 mb-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" />
+          </svg>
+          <p class="text-2xl mb-4 text-gray-400" style="font-family: Cormorant, serif;">Your bag is empty</p>
+          <a routerLink="/shop" class="text-xs tracking-[0.25em] uppercase border-b border-black pb-1 hover:opacity-60 transition-opacity">
+            Continue Shopping
+          </a>
+        </div>
+      } @else {
+        <div class="grid grid-cols-1 lg:grid-cols-[1fr_380px] xl:grid-cols-[1fr_420px] gap-8 md:gap-16">
+
+          <!-- ===================== ITEM LIST ===================== -->
+          <div>
+            <div class="hidden lg:grid grid-cols-[1fr_auto] gap-8 pb-4 border-b border-black/10 mb-2">
+              <span class="text-xs tracking-[0.2em] uppercase text-gray-400">Product</span>
+              <span class="text-xs tracking-[0.2em] uppercase text-gray-400 text-right">Total</span>
+            </div>
+
+            @for (item of items(); track item.variantId) {
+              <div class="flex gap-4 md:gap-6 py-6 md:py-8 border-b border-black/10">
+
+                <!-- Image -->
+                <a [routerLink]="['/product', item.slug]" class="block shrink-0 w-20 md:w-28 overflow-hidden" style="background-color: #E8E4DD;">
+                  <img [src]="item.imageUrl" [alt]="item.name" class="w-full h-28 md:h-36 object-cover hover:scale-105 transition-transform duration-500" />
+                </a>
+
+                <!-- Details -->
+                <div class="flex-1 flex flex-col justify-between min-w-0">
+                  <div>
+                    <a [routerLink]="['/product', item.slug]"
+                       class="text-sm md:text-base tracking-wide hover:opacity-60 transition-opacity block truncate"
+                       style="font-family: Cormorant, serif;">{{ item.name }}</a>
+                    <div class="flex gap-2 md:gap-4 mt-1 md:mt-2 text-xs text-gray-400 tracking-wider uppercase flex-wrap">
+                      <span>{{ item.color }}</span>
+                      <span>·</span>
+                      <span>Size {{ item.size }}</span>
+                    </div>
+                    <p class="text-xs md:text-sm mt-1 text-gray-500">€ {{ item.price }}</p>
+                  </div>
+
+                  <div class="flex items-center gap-3 md:gap-4 mt-3 md:mt-4">
+                    <div class="flex items-center border border-black/20 w-fit">
+                      <button (click)="decrement(item.variantId)"
+                              class="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center hover:bg-black/5 transition-colors text-sm">−</button>
+                      <span class="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center text-xs border-x border-black/20">{{ item.quantity }}</span>
+                      <button (click)="increment(item.variantId)"
+                              class="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center hover:bg-black/5 transition-colors text-sm">+</button>
+                    </div>
+                    <button (click)="remove(item.variantId)"
+                            class="text-xs tracking-wider text-gray-400 uppercase hover:text-black transition-colors underline">
+                      Remove
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Line total — desktop only -->
+                <div class="hidden lg:block text-right shrink-0">
+                  <span class="text-sm" style="font-family: Cormorant, serif;">€ {{ item.price * item.quantity }}</span>
+                </div>
+
+              </div>
+            }
+
+            <div class="mt-6 md:mt-8">
+              <a routerLink="/shop"
+                 class="inline-flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-gray-400 hover:text-black transition-colors">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
+                </svg>
+                Continue Shopping
+              </a>
+            </div>
+          </div>
+
+          <!-- ===================== ORDER SUMMARY ===================== -->
+          <div>
+            <div class="bg-white p-6 md:p-10 lg:sticky lg:top-24">
+              <h2 class="text-xl md:text-2xl tracking-[0.1em] mb-6 md:mb-8" style="font-family: Cormorant, serif; font-weight: 400;">
+                Order Summary
+              </h2>
+
+              <div class="space-y-3 md:space-y-4 mb-6 md:mb-8">
+                <div class="flex justify-between text-sm text-gray-600">
+                  <span class="tracking-wider">Subtotal ({{ itemCount() }} items)</span>
+                  <span>€ {{ subtotal() }}</span>
+                </div>
+                <div class="flex justify-between text-sm text-gray-600">
+                  <span class="tracking-wider">Shipping</span>
+                  @if (shipping() === 0) {
+                    <span style="color: #C9A962;">Complimentary</span>
+                  } @else {
+                    <span>€ {{ shipping() }}</span>
+                  }
+                </div>
+                @if (shipping() > 0) {
+                  <p class="text-xs text-gray-400 tracking-wider">Add € {{ 250 - subtotal() }} more for free shipping</p>
+                }
+              </div>
+
+              <div class="border-t border-black/10 pt-5 mb-6 md:mb-8 flex justify-between">
+                <span class="text-sm tracking-[0.2em] uppercase">Total</span>
+                <span class="text-xl" style="font-family: Cormorant, serif;">€ {{ total() }}</span>
+              </div>
+
+              <div class="flex gap-2 mb-6 md:mb-8">
+                <input type="text" placeholder="Promo code"
+                       class="flex-1 min-w-0 h-11 px-4 text-xs tracking-wider border border-black/20 bg-transparent focus:outline-none focus:border-black transition-colors placeholder:text-gray-400" />
+                <button class="h-11 px-4 md:px-5 text-xs tracking-[0.15em] uppercase border border-black/20 hover:bg-black hover:text-white transition-all duration-300 shrink-0">
+                  Apply
+                </button>
+              </div>
+
+              <a routerLink="/checkout"
+                 class="block w-full py-4 md:py-5 text-center text-xs md:text-sm tracking-[0.2em] uppercase bg-black text-white hover:bg-black/80 transition-colors duration-300">
+                Proceed to Checkout
+              </a>
+
+              <div class="mt-5 flex flex-wrap justify-center gap-3 md:gap-6 text-xs text-gray-400 tracking-wider">
+                <span>Free Returns</span>
+                <span>·</span>
+                <span>Secure Checkout</span>
+                <span>·</span>
+                <span>Authenticity Guaranteed</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      }
+
+    </div>
+  </div>
+
+</app-layout>

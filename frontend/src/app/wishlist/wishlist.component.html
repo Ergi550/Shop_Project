@@ -1,0 +1,87 @@
+<app-layout [solidNav]="true">
+
+  <div class="pt-24 md:pt-32 pb-16 md:pb-24 px-4 md:px-8 min-h-screen" style="background-color: #FAF8F5;">
+    <div class="max-w-[1440px] mx-auto">
+
+      <div class="mb-10 md:mb-16">
+        <h1 class="text-4xl md:text-5xl tracking-wide mb-2" style="font-family: Cormorant, serif; font-weight: 400;">Wishlist</h1>
+        <p class="text-sm text-gray-400 tracking-wider">{{ itemCount() }} {{ itemCount() === 1 ? 'item' : 'items' }} saved</p>
+      </div>
+
+      @if (items().length === 0) {
+        <div class="flex flex-col items-center justify-center py-24 md:py-32 text-center">
+          <svg class="w-14 h-14 text-gray-200 mb-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+          <p class="text-2xl mb-4 text-gray-400" style="font-family: Cormorant, serif;">Your wishlist is empty</p>
+          <a routerLink="/shop" class="text-xs tracking-[0.25em] uppercase border-b border-black pb-1 hover:opacity-60 transition-opacity">
+            Discover the Collection
+          </a>
+        </div>
+      } @else {
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-x-4 md:gap-x-8 gap-y-10 md:gap-y-16">
+          @for (item of items(); track item.productId) {
+            <div class="group relative" [class.opacity-40]="isMoving(item.productId)" [class.transition-opacity]="true" [class.duration-500]="true">
+
+              <a [routerLink]="['/product', item.slug]" class="block">
+                <div class="aspect-[3/4] overflow-hidden mb-3 md:mb-5 relative" style="background-color: #E8E4DD;">
+                  <img [src]="item.imageUrl" [alt]="item.name"
+                       class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+
+                  @if (item.isNew) {
+                    <span class="absolute top-3 left-3 text-xs tracking-[0.15em] uppercase px-2 py-0.5 bg-white"
+                          style="color: #C9A962;">New</span>
+                  }
+
+                  <!-- Remove on hover (desktop only) -->
+                  <button (click)="remove(item.productId); $event.preventDefault(); $event.stopPropagation()"
+                          class="absolute top-3 right-3 w-7 h-7 md:w-8 md:h-8 rounded-full bg-white flex items-center justify-center md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 hover:bg-gray-100"
+                          aria-label="Remove from wishlist">
+                    <svg class="w-3.5 h-3.5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </div>
+              </a>
+
+              <div class="mb-3">
+                <p class="text-xs tracking-[0.2em] uppercase text-gray-400 mb-1">{{ item.category }}</p>
+                <a [routerLink]="['/product', item.slug]"
+                   class="text-sm md:text-base tracking-wide hover:opacity-60 transition-opacity block"
+                   style="font-family: Cormorant, serif;">{{ item.name }}</a>
+                <p class="text-xs md:text-sm text-gray-500 mt-1">€ {{ item.price }}</p>
+              </div>
+
+              <div class="flex gap-2">
+                <button (click)="moveToCart(item.productId)"
+                        class="flex-1 py-2.5 md:py-3 text-xs tracking-[0.2em] uppercase bg-black text-white hover:bg-black/80 transition-colors duration-300">
+                  @if (isMoving(item.productId)) { Added ✓ } @else { Move to Bag }
+                </button>
+                <button (click)="remove(item.productId)"
+                        class="w-10 h-9 md:w-12 md:h-10 flex items-center justify-center border border-black/20 hover:border-black transition-colors duration-200"
+                        aria-label="Remove">
+                  <svg class="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                    <path d="M10 11v6M14 11v6" />
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                  </svg>
+                </button>
+              </div>
+
+            </div>
+          }
+        </div>
+
+        <div class="mt-16 md:mt-24 text-center border-t border-black/10 pt-12 md:pt-16">
+          <p class="text-xl md:text-2xl mb-6 md:mb-8 text-gray-400" style="font-family: Cormorant, serif;">Looking for more?</p>
+          <a routerLink="/shop" class="inline-block text-xs tracking-[0.25em] uppercase border-b border-black pb-1 hover:opacity-60 transition-opacity">
+            Continue Shopping
+          </a>
+        </div>
+      }
+
+    </div>
+  </div>
+
+</app-layout>
