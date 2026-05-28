@@ -4,6 +4,9 @@ import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthUser } from '../models';
+import { CartService } from './cart.service';
+import { WishlistService } from './wishlist.service';
+import { OrderService } from './order.service';
 
 interface TokenResponse {
   access: string;
@@ -20,11 +23,22 @@ interface RegisterPayload {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
+  private cart = inject(CartService);
+  private wishlist = inject(WishlistService);
+  private orders = inject(OrderService);
   private api = environment.apiUrl;
 
   private _user = signal<AuthUser | null>(this.loadUser());
   readonly currentUser = this._user.asReadonly();
   readonly isLoggedIn = computed(() => this._user() !== null);
+
+  constructor() {
+    const user = this._user();
+    if (user) {
+      this.cart.switchUser(String(user.id));
+      this.wishlist.switchUser(String(user.id));
+    }
+  }
 
   login(email: string, password: string): Observable<TokenResponse> {
     return this.http.post<TokenResponse>(`${this.api}/auth/token/`, { username: email, password }).pipe(
@@ -48,6 +62,8 @@ export class AuthService {
       next: user => {
         this._user.set(user);
         localStorage.setItem('auth_user', JSON.stringify(user));
+        this.cart.switchUser(String(user.id));
+        this.wishlist.switchUser(String(user.id));
       },
       error: () => this.logout(),
     });
@@ -58,6 +74,9 @@ export class AuthService {
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('auth_user');
     this._user.set(null);
+    this.cart.switchUser(null);
+    this.wishlist.switchUser(null);
+    this.orders.clearLastOrder();
   }
 
   private loadUser(): AuthUser | null {

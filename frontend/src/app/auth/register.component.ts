@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LayoutComponent } from '../layout/layout.component';
 import { AuthService } from '../core/services/auth.service';
@@ -13,6 +13,7 @@ import { AuthService } from '../core/services/auth.service';
 })
 export class RegisterComponent {
   private auth = inject(AuthService);
+  private router = inject(Router);
 
   firstName = signal('');
   lastName = signal('');
@@ -49,6 +50,7 @@ export class RegisterComponent {
       next: () => {
         this.loading.set(false);
         this.submitted.set(true);
+        setTimeout(() => this.router.navigate(['/login']), 2000);
       },
       error: (err) => {
         this.loading.set(false);

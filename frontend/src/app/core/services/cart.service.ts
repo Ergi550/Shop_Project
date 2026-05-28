@@ -1,11 +1,10 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { CartItem } from '../models';
 
-const STORAGE_KEY = 'aurelia_cart';
-
 @Injectable({ providedIn: 'root' })
 export class CartService {
-  private _items = signal<CartItem[]>(this.load());
+  private userId: string | null = null;
+  private _items = signal<CartItem[]>([]);
 
   readonly items = this._items.asReadonly();
 
@@ -53,18 +52,27 @@ export class CartService {
     this.save();
   }
 
+  switchUser(userId: string | null): void {
+    this.userId = userId;
+    this._items.set(this.load());
+  }
+
   clear(): void {
     this._items.set([]);
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(this.key);
+  }
+
+  private get key(): string {
+    return `aurelia_cart_${this.userId ?? 'guest'}`;
   }
 
   private save(): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(this._items()));
+    localStorage.setItem(this.key, JSON.stringify(this._items()));
   }
 
   private load(): CartItem[] {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(this.key);
       return raw ? JSON.parse(raw) : [];
     } catch {
       return [];

@@ -36,7 +36,7 @@ class ProductVariant(models.Model):
 
   class Meta:
     unique_together=("product","size","color")
-  def _str__(self):
+  def __str__(self):
    return  f"{self.product.name} — {self.size}/{self.color}"
 from django.conf import settings
 

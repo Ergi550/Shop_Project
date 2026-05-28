@@ -27,8 +27,19 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
 
 
+class OrderItemVariantSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    product_slug = serializers.CharField(source='product.slug', read_only=True)
+    product_image = serializers.ImageField(source='product.image', read_only=True)
+
+    class Meta:
+        model = ProductVariant
+        fields = ["id", "size", "color", "product_name", "product_slug", "product_image"]
+
+
 class OrderItemSerializer(serializers.ModelSerializer):
     subtotal = serializers.ReadOnlyField()
+    variant = OrderItemVariantSerializer(read_only=True)
 
     class Meta:
         model = OrderItem

@@ -1,0 +1,139 @@
+<app-layout [solidNav]="true">
+  <div class="min-h-screen pt-24 pb-16 px-4 md:px-8 max-w-4xl mx-auto">
+
+    <!-- Header -->
+    <div class="mb-10 border-b border-black/10 pb-6">
+      <p class="text-xs tracking-[0.25em] uppercase text-gray-400 mb-1">Account</p>
+      <h1 class="text-3xl tracking-wide" style="font-family: Cormorant, serif; font-weight: 400;">My Orders</h1>
+    </div>
+
+    <!-- Loading -->
+    @if (loading()) {
+      <div class="flex justify-center py-20">
+        <div class="w-6 h-6 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
+      </div>
+    }
+
+    <!-- Error -->
+    @if (error()) {
+      <p class="text-sm text-red-500 text-center py-10 tracking-wider">{{ error() }}</p>
+    }
+
+    <!-- Empty state -->
+    @if (!loading() && !error() && orders().length === 0) {
+      <div class="text-center py-20">
+        <svg class="w-10 h-10 text-gray-200 mx-auto mb-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        <p class="text-sm text-gray-400 tracking-wider mb-6">You haven't placed any orders yet.</p>
+        <a routerLink="/shop"
+           class="text-xs tracking-[0.25em] uppercase border-b border-black pb-0.5 hover:opacity-60 transition-opacity">
+          Start Shopping
+        </a>
+      </div>
+    }
+
+    <!-- Orders list -->
+    @if (!loading() && orders().length > 0) {
+      <div class="space-y-4">
+        @for (order of orders(); track order.id) {
+          <div class="border border-black/10">
+
+            <!-- Order header row -->
+            <button
+              class="w-full flex items-center justify-between px-5 py-4 hover:bg-black/[0.02] transition-colors text-left"
+              (click)="toggleOrder(order.id)">
+              <div class="flex items-center gap-6 min-w-0">
+                <div>
+                  <p class="text-xs tracking-[0.15em] uppercase text-gray-400">Order</p>
+                  <p class="text-sm font-medium text-black">#{{ order.id }}</p>
+                </div>
+                <div class="hidden sm:block">
+                  <p class="text-xs tracking-[0.15em] uppercase text-gray-400">Date</p>
+                  <p class="text-sm text-black">{{ order.created_at | date:'mediumDate' }}</p>
+                </div>
+                <div>
+                  <p class="text-xs tracking-[0.15em] uppercase text-gray-400">Total</p>
+                  <p class="text-sm text-black">€{{ order.total | number:'1.2-2' }}</p>
+                </div>
+                <div>
+                  <span class="text-xs tracking-wider uppercase px-2.5 py-1 rounded-sm font-medium"
+                        [ngClass]="statusColor(order.status)">
+                    {{ order.status }}
+                  </span>
+                </div>
+              </div>
+              <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200"
+                   [class.rotate-180]="expandedOrderId() === order.id"
+                   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+
+            <!-- Expanded order details -->
+            @if (expandedOrderId() === order.id) {
+              <div class="border-t border-black/10 px-5 py-5 bg-black/[0.01]">
+
+                <!-- Items -->
+                <p class="text-xs tracking-[0.2em] uppercase text-gray-400 mb-4">Items</p>
+                <div class="space-y-3 mb-6">
+                  @for (item of order.items; track item.id) {
+                    <div class="flex items-center gap-4">
+                      @if (item.variant.product_image) {
+                        <img [src]="item.variant.product_image" [alt]="item.variant.product_name"
+                             class="w-12 h-14 object-cover bg-gray-100 shrink-0" />
+                      } @else {
+                        <div class="w-12 h-14 bg-gray-100 shrink-0 flex items-center justify-center">
+                          <svg class="w-4 h-4 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                          </svg>
+                        </div>
+                      }
+                      <div class="flex-1 min-w-0">
+                        <a [routerLink]="['/product', item.variant.product_slug]"
+                           class="text-sm text-black hover:opacity-60 transition-opacity truncate block">
+                          {{ item.variant.product_name }}
+                        </a>
+                        <p class="text-xs text-gray-400 mt-0.5">
+                          @if (item.variant.size) { Size: {{ item.variant.size }} }
+                          @if (item.variant.size && item.variant.color) { · }
+                          @if (item.variant.color) { Color: {{ item.variant.color }} }
+                        </p>
+                      </div>
+                      <div class="text-right shrink-0">
+                        <p class="text-sm text-black">€{{ item.subtotal | number:'1.2-2' }}</p>
+                        <p class="text-xs text-gray-400">Qty {{ item.quantity }} × €{{ item.price | number:'1.2-2' }}</p>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <!-- Shipping info -->
+                <div class="border-t border-black/10 pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <p class="text-xs tracking-[0.2em] uppercase text-gray-400 mb-2">Ship to</p>
+                    <p class="text-sm text-black">{{ order.shipping_full_name }}</p>
+                    <p class="text-sm text-gray-500">{{ order.shipping_address }}</p>
+                    <p class="text-sm text-gray-500">{{ order.shipping_city }}, {{ order.shipping_postcode }}</p>
+                    <p class="text-sm text-gray-500">{{ order.shipping_country }}</p>
+                    @if (order.shipping_phone) {
+                      <p class="text-sm text-gray-500 mt-1">{{ order.shipping_phone }}</p>
+                    }
+                  </div>
+                  <div class="sm:text-right">
+                    <p class="text-xs tracking-[0.2em] uppercase text-gray-400 mb-2">Order total</p>
+                    <p class="text-xl text-black" style="font-family: Cormorant, serif;">
+                      €{{ order.total | number:'1.2-2' }}
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+</app-layout>

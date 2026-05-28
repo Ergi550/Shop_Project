@@ -25,7 +25,7 @@ class ProductListView(generics.ListAPIView):
 
 
 class ProductDetailView(generics.RetrieveAPIView):
-    queryset = Product.objects.all()
+    queryset = Product.objects.filter(available=True).select_related('category').prefetch_related('variants')
     serializer_class = ProductSerializer
     permission_classes = [permissions.AllowAny]
     lookup_field = "slug"
@@ -66,13 +66,28 @@ class OrderCreateView(generics.CreateAPIView):
             return Response({"detail": "No items provided."}, status=400)
 
         for item in items:
-            variant = ProductVariant.objects.get(id=item["variant"])
+            try:
+                variant = ProductVariant.objects.select_related('product').get(id=item["variant"])
+            except ProductVariant.DoesNotExist:
+                order.delete()
+                return Response({"detail": f"Variant {item['variant']} not found."}, status=400)
+
+            quantity = item["quantity"]
+            if variant.stock < quantity:
+                order.delete()
+                return Response(
+                    {"detail": f"'{variant.product.name}' only has {variant.stock} item(s) in stock."},
+                    status=400,
+                )
+
             OrderItem.objects.create(
                 order=order,
                 variant=variant,
-                quantity=item["quantity"],
-                price=variant.product.price,   # snapshot at purchase time
+                quantity=quantity,
+                price=variant.product.price,
             )
+            variant.stock -= quantity
+            variant.save(update_fields=["stock"])
 
         return Response(self.get_serializer(order).data, status=201)
 

@@ -28,7 +28,7 @@
       <!-- Center brand -->
       <div class="absolute left-1/2 -translate-x-1/2">
         <a routerLink="/" class="text-xl md:text-3xl tracking-[0.3em]" [class.text-black]="navDark" [class.text-white]="!navDark"
-           style="font-family: Cormorant, serif; font-weight: 400;">AURELIA</a>
+           style="font-family: Cormorant, serif; font-weight: 400;">GERI'S</a>
       </div>
 
       <!-- Right -->
@@ -39,12 +39,21 @@
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </svg>
         </a>
-        <a routerLink="/login" class="hidden sm:block hover:opacity-60 transition-opacity" aria-label="Account">
-          <svg class="w-5 h-5" [class.text-black]="navDark" [class.text-white]="!navDark"
-               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-          </svg>
-        </a>
+        @if (auth.isLoggedIn()) {
+          <button (click)="toggleAccount()" class="hidden sm:flex items-center gap-1.5 hover:opacity-60 transition-opacity" aria-label="Account">
+            <svg class="w-5 h-5" [class.text-black]="navDark" [class.text-white]="!navDark"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+            </svg>
+          </button>
+        } @else {
+          <a routerLink="/login" class="hidden sm:block hover:opacity-60 transition-opacity" aria-label="Account">
+            <svg class="w-5 h-5" [class.text-black]="navDark" [class.text-white]="!navDark"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+            </svg>
+          </a>
+        }
         <a routerLink="/cart" class="relative hover:opacity-60 transition-opacity" aria-label="Cart">
           <svg class="w-5 h-5" [class.text-black]="navDark" [class.text-white]="!navDark"
                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -81,7 +90,12 @@
         }
       </nav>
       <div class="mt-auto pt-8 border-t border-black/10 flex flex-col gap-4 text-sm tracking-wider uppercase text-gray-600">
-        <a routerLink="/login" (click)="closeMenu()" class="hover:text-black transition-colors">Account</a>
+        @if (auth.isLoggedIn()) {
+          <span class="text-black">{{ auth.currentUser()?.first_name || auth.currentUser()?.email }}</span>
+          <button (click)="auth.logout(); closeMenu()" class="hover:text-black transition-colors text-left">Sign Out</button>
+        } @else {
+          <a routerLink="/login" (click)="closeMenu()" class="hover:text-black transition-colors">Account</a>
+        }
         <a routerLink="/wishlist" (click)="closeMenu()" class="hover:text-black transition-colors">Wishlist</a>
         <a href="#" class="hover:text-black transition-colors">Contact Us</a>
       </div>
@@ -116,6 +130,52 @@
       </div>
     </div>
   </div>
+
+  <!-- ===================== ACCOUNT DROPDOWN ===================== -->
+  @if (auth.isLoggedIn() && accountOpen()) {
+    <div class="fixed inset-0 z-40" (click)="closeAccount()"></div>
+    <div class="fixed top-[68px] right-4 md:right-8 z-50 bg-white border border-black/10 shadow-xl w-72">
+      <div class="p-6">
+        <!-- Header -->
+        <p class="text-xs tracking-[0.2em] uppercase text-gray-400 mb-4">My Account</p>
+
+        <!-- User info -->
+        <div class="flex items-center gap-4 mb-6">
+          <div class="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-black truncate">
+              {{ auth.currentUser()?.first_name }} {{ auth.currentUser()?.last_name }}
+            </p>
+            <p class="text-xs text-gray-400 truncate mt-0.5">{{ auth.currentUser()?.email }}</p>
+          </div>
+        </div>
+
+        <!-- Details -->
+        <div class="space-y-3 border-t border-black/10 pt-4 mb-5">
+          <div>
+            <p class="text-xs tracking-wider uppercase text-gray-400">Username</p>
+            <p class="text-sm text-black mt-0.5">{{ auth.currentUser()?.username }}</p>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col gap-2">
+          <a routerLink="/orders" (click)="closeAccount()"
+             class="text-xs tracking-[0.15em] uppercase text-center border border-black/20 py-2.5 hover:bg-black hover:text-white transition-colors">
+            My Orders
+          </a>
+          <button (click)="auth.logout(); closeAccount()"
+                  class="text-xs tracking-[0.15em] uppercase text-center py-2.5 text-gray-500 hover:text-black transition-colors">
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 
   <!-- ===================== PAGE CONTENT ===================== -->
   <main>
@@ -167,7 +227,7 @@
         </div>
       </div>
       <div class="border-t border-white/10 pt-8 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <p class="text-sm text-gray-500">© 2026 Aurelia. All rights reserved.</p>
+        <p class="text-sm text-gray-500">© 2026 Geri's. All rights reserved.</p>
         <div class="flex gap-6">
           <a href="#" class="text-sm text-gray-500 hover:text-white transition-colors">Privacy Policy</a>
           <a href="#" class="text-sm text-gray-500 hover:text-white transition-colors">Terms of Service</a>

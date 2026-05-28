@@ -1,11 +1,10 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { WishlistItem } from '../models';
 
-const STORAGE_KEY = 'aurelia_wishlist';
-
 @Injectable({ providedIn: 'root' })
 export class WishlistService {
-  private _items = signal<WishlistItem[]>(this.load());
+  private userId: string | null = null;
+  private _items = signal<WishlistItem[]>([]);
 
   readonly items = this._items.asReadonly();
   readonly itemCount = computed(() => this._items().length);
@@ -29,18 +28,27 @@ export class WishlistService {
     return this._items().some(i => i.productId === productId);
   }
 
+  switchUser(userId: string | null): void {
+    this.userId = userId;
+    this._items.set(this.load());
+  }
+
   clear(): void {
     this._items.set([]);
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(this.key);
+  }
+
+  private get key(): string {
+    return `aurelia_wishlist_${this.userId ?? 'guest'}`;
   }
 
   private save(): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(this._items()));
+    localStorage.setItem(this.key, JSON.stringify(this._items()));
   }
 
   private load(): WishlistItem[] {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(this.key);
       return raw ? JSON.parse(raw) : [];
     } catch {
       return [];

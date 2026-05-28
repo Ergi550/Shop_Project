@@ -22,4 +22,8 @@ export class OrderService {
       tap(order => this._lastOrder.set(order))
     );
   }
+
+  clearLastOrder(): void {
+    this._lastOrder.set(null);
+  }
 }

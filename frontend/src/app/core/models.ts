@@ -25,9 +25,18 @@ export interface Product {
   created_at: string;
 }
 
+export interface OrderItemVariant {
+  id: number;
+  size: string;
+  color: string;
+  product_name: string;
+  product_slug: string;
+  product_image: string | null;
+}
+
 export interface OrderItem {
   id: number;
-  variant: number;
+  variant: OrderItemVariant;
   quantity: number;
   price: number;
   subtotal: number;

@@ -24,6 +24,7 @@ export class LayoutComponent {
   scrolled = signal(false);
   menuOpen = signal(false);
   searchOpen = signal(false);
+  accountOpen = signal(false);
 
   categories: NavCategory[] = [
     { name: 'New Arrivals', slug: 'new-arrivals' },
@@ -42,6 +43,7 @@ export class LayoutComponent {
   openMenu(): void {
     this.menuOpen.set(true);
     this.searchOpen.set(false);
+    this.accountOpen.set(false);
   }
 
   closeMenu(): void {
@@ -51,10 +53,21 @@ export class LayoutComponent {
   openSearch(): void {
     this.searchOpen.set(true);
     this.menuOpen.set(false);
+    this.accountOpen.set(false);
   }
 
   closeSearch(): void {
     this.searchOpen.set(false);
+  }
+
+  toggleAccount(): void {
+    this.accountOpen.update(v => !v);
+    this.menuOpen.set(false);
+    this.searchOpen.set(false);
+  }
+
+  closeAccount(): void {
+    this.accountOpen.set(false);
   }
 
   get navDark(): boolean {

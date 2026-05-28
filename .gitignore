@@ -12,6 +12,7 @@ db.sqlite3
 # ---- Django collected static / media ----
 staticfiles/
 mediafiles/
+media/
 
 # ---- Node / Angular ----
 node_modules/
