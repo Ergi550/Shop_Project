@@ -9,7 +9,13 @@ import { OrderConfirmationComponent } from './order-confirmation/order-confirmat
 import { LoginComponent } from './auth/login.component';
 import { RegisterComponent } from './auth/register.component';
 import { MyOrdersComponent } from './orders/my-orders.component';
+import { AdminComponent } from './admin/admin.component';
+import { AdminDashboardComponent } from './admin/dashboard/admin-dashboard.component';
+import { AdminProductsComponent } from './admin/products/admin-products.component';
+import { AdminCategoriesComponent } from './admin/categories/admin-categories.component';
+import { AdminOrdersComponent } from './admin/orders/admin-orders.component';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -21,6 +27,18 @@ export const routes: Routes = [
   { path: 'checkout', component: CheckoutComponent, canActivate: [authGuard] },
   { path: 'order-confirmation', component: OrderConfirmationComponent, canActivate: [authGuard] },
   { path: 'orders', component: MyOrdersComponent, canActivate: [authGuard] },
+  {
+    path: 'admin',
+    component: AdminComponent,
+    canActivate: [adminGuard],
+    children: [
+      { path: '',           redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard',  component: AdminDashboardComponent  },
+      { path: 'products',   component: AdminProductsComponent   },
+      { path: 'categories', component: AdminCategoriesComponent },
+      { path: 'orders',     component: AdminOrdersComponent     },
+    ],
+  },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: '**', redirectTo: '' },

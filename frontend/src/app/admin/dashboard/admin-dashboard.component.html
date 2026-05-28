@@ -1,0 +1,115 @@
+<div class="p-6 md:p-10">
+
+  <!-- Header -->
+  <p class="text-xs tracking-[0.25em] uppercase mb-1" style="color:#C9A962;">Overview</p>
+  <h1 class="text-3xl tracking-wide text-black mb-8" style="font-family:'Cormorant Garamond',serif;font-weight:400;">Dashboard</h1>
+
+  @if (loading()) {
+    <div class="flex justify-center py-20">
+      <div class="w-6 h-6 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
+    </div>
+  }
+
+  @if (error()) {
+    <p class="text-sm text-red-500 tracking-wide">{{ error() }}</p>
+  }
+
+  @if (data(); as d) {
+
+    <!-- Stat Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+      <div class="bg-white border border-black/10 p-6">
+        <p class="text-xs tracking-[0.2em] uppercase text-gray-400 mb-3">Total Products</p>
+        <p class="text-4xl text-black" style="font-family:'Cormorant Garamond',serif;">{{ d.total_products }}</p>
+        <p class="text-xs text-gray-400 mt-2">{{ d.available_products }} available</p>
+      </div>
+      <div class="bg-white border border-black/10 p-6">
+        <p class="text-xs tracking-[0.2em] uppercase text-gray-400 mb-3">Total Orders</p>
+        <p class="text-4xl text-black" style="font-family:'Cormorant Garamond',serif;">{{ d.total_orders }}</p>
+        <p class="text-xs text-gray-400 mt-2">all time</p>
+      </div>
+      <div class="bg-white border border-black/10 p-6">
+        <p class="text-xs tracking-[0.2em] uppercase text-gray-400 mb-3">Pending</p>
+        <p class="text-4xl text-black" style="font-family:'Cormorant Garamond',serif;">{{ d.orders_by_status['pending'] || 0 }}</p>
+        <p class="text-xs text-gray-400 mt-2">awaiting action</p>
+      </div>
+      <div class="bg-white border border-black/10 p-6">
+        <p class="text-xs tracking-[0.2em] uppercase text-gray-400 mb-3">Low Stock</p>
+        <p class="text-4xl text-black" style="font-family:'Cormorant Garamond',serif;">{{ d.low_stock_variants.length }}</p>
+        <p class="text-xs text-gray-400 mt-2">variants ≤ 5 units</p>
+      </div>
+    </div>
+
+    <!-- Two-column section -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+
+      <!-- Recent Orders -->
+      <div class="bg-white border border-black/10">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-black/10">
+          <p class="text-xs tracking-[0.2em] uppercase text-gray-500">Recent Orders</p>
+          <a routerLink="/admin/orders" class="text-xs tracking-wider uppercase border-b border-black/30 hover:opacity-60 transition-opacity">View All</a>
+        </div>
+        @if (d.recent_orders.length === 0) {
+          <p class="text-sm text-gray-400 text-center py-10 tracking-wide">No orders yet.</p>
+        } @else {
+          <div class="divide-y divide-black/5">
+            @for (order of d.recent_orders; track order.id) {
+              <div class="flex items-center justify-between px-6 py-4">
+                <div>
+                  <p class="text-sm text-black font-medium">#{{ order.id }} — {{ order.customer_name }}</p>
+                  <p class="text-xs text-gray-400 mt-0.5">{{ order.created_at | date:'mediumDate' }} · {{ order.item_count }} item(s)</p>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="text-sm text-black">€{{ order.total | number:'1.2-2' }}</span>
+                  <span class="text-xs tracking-wider uppercase px-2 py-1 border rounded-sm" [ngClass]="statusColor(order.status)">{{ order.status }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Low Stock -->
+      <div class="bg-white border border-black/10">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-black/10">
+          <p class="text-xs tracking-[0.2em] uppercase text-gray-500">Low Stock Alerts</p>
+          <a routerLink="/admin/products" class="text-xs tracking-wider uppercase border-b border-black/30 hover:opacity-60 transition-opacity">View Products</a>
+        </div>
+        @if (d.low_stock_variants.length === 0) {
+          <p class="text-sm text-gray-400 text-center py-10 tracking-wide">All variants are well stocked.</p>
+        } @else {
+          <div class="divide-y divide-black/5">
+            @for (v of d.low_stock_variants; track v.id) {
+              <div class="flex items-center justify-between px-6 py-4">
+                <div>
+                  <p class="text-sm text-black">{{ v.product_name }}</p>
+                  <p class="text-xs text-gray-400 mt-0.5">
+                    @if (v.size) { Size: {{ v.size }} }
+                    @if (v.size && v.color) { · }
+                    @if (v.color) { {{ v.color }} }
+                  </p>
+                </div>
+                <span class="text-sm font-medium" [ngClass]="stockColor(v.stock)">{{ v.stock }} left</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+    </div>
+
+    <!-- Orders by status -->
+    <div class="mt-6 bg-white border border-black/10 p-6">
+      <p class="text-xs tracking-[0.2em] uppercase text-gray-400 mb-5">Orders by Status</p>
+      <div class="flex flex-wrap gap-4">
+        @for (entry of d.orders_by_status | keyvalue; track entry.key) {
+          <div class="flex items-center gap-3 px-4 py-3 border border-black/10">
+            <span class="text-xs tracking-[0.15em] uppercase px-2 py-0.5 border rounded-sm" [ngClass]="statusColor(entry.key)">{{ entry.key }}</span>
+            <span class="text-2xl text-black" style="font-family:'Cormorant Garamond',serif;">{{ entry.value }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+  }
+</div>

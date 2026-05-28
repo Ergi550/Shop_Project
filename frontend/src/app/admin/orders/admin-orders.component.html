@@ -1,0 +1,179 @@
+<div class="p-6 md:p-10">
+
+  <div class="mb-6">
+    <p class="text-xs tracking-[0.25em] uppercase mb-1" style="color:#C9A962;">Sales</p>
+    <h1 class="text-3xl tracking-wide text-black" style="font-family:'Cormorant Garamond',serif;font-weight:400;">Orders</h1>
+  </div>
+
+  @if (error()) {
+    <div class="mb-5 px-4 py-3 bg-red-50 border border-red-200 text-sm text-red-600">{{ error() }}</div>
+  }
+
+  <!-- Status Filter Tabs -->
+  <div class="flex flex-wrap gap-2 mb-6">
+    <button (click)="setFilter('')"
+      class="text-xs tracking-[0.15em] uppercase px-4 py-2 border transition-colors"
+      [class]="activeFilter() === '' ? 'bg-black text-white border-black' : 'border-black/20 text-gray-500 hover:border-black hover:text-black'">
+      All
+    </button>
+    @for (s of statuses; track s) {
+      <button (click)="setFilter(s)"
+        class="text-xs tracking-[0.15em] uppercase px-4 py-2 border transition-colors"
+        [class]="activeFilter() === s ? 'bg-black text-white border-black' : 'border-black/20 text-gray-500 hover:border-black hover:text-black'">
+        {{ s }}
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center py-16"><div class="w-6 h-6 border-2 border-black/20 border-t-black rounded-full animate-spin"></div></div>
+  } @else if (orders().length === 0) {
+    <div class="text-center py-20 bg-white border border-black/10">
+      <p class="text-sm text-gray-400 tracking-wide">No orders found.</p>
+    </div>
+  } @else {
+    <div class="bg-white border border-black/10 overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-black/10">
+            <th class="text-left px-5 py-4 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal">#</th>
+            <th class="text-left px-5 py-4 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal">Customer</th>
+            <th class="text-left px-5 py-4 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal hidden sm:table-cell">Date</th>
+            <th class="text-right px-5 py-4 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal">Total</th>
+            <th class="text-center px-5 py-4 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal">Status</th>
+            <th class="text-right px-5 py-4 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal">View</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-black/5">
+          @for (order of orders(); track order.id) {
+            <tr class="hover:bg-black/[0.015] transition-colors cursor-pointer" (click)="openDetail(order.id)">
+              <td class="px-5 py-4 text-sm text-black font-medium">#{{ order.id }}</td>
+              <td class="px-5 py-4">
+                <p class="text-sm text-black">{{ order.customer_name }}</p>
+                <p class="text-xs text-gray-400 mt-0.5">{{ order.customer_email }}</p>
+              </td>
+              <td class="px-5 py-4 text-sm text-gray-500 hidden sm:table-cell">{{ order.created_at | date:'mediumDate' }}</td>
+              <td class="px-5 py-4 text-sm text-black text-right">€{{ order.total | number:'1.2-2' }}</td>
+              <td class="px-5 py-4 text-center">
+                <span class="text-xs tracking-wider uppercase px-2.5 py-1 border rounded-sm" [ngClass]="statusColor(order.status)">
+                  {{ order.status }}
+                </span>
+              </td>
+              <td class="px-5 py-4 text-right">
+                <button (click)="openDetail(order.id); $event.stopPropagation()"
+                  class="text-xs tracking-wider uppercase text-gray-400 hover:text-black transition-colors">
+                  Details →
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+</div>
+
+<!-- ═══ DETAIL PANEL ═══ -->
+<div class="fixed inset-0 z-40 bg-black/40 transition-opacity duration-300"
+  [class.opacity-100]="detailOpen()" [class.pointer-events-auto]="detailOpen()"
+  [class.opacity-0]="!detailOpen()" [class.pointer-events-none]="!detailOpen()"
+  (click)="closeDetail()"></div>
+
+<aside class="fixed top-0 right-0 bottom-0 z-50 w-full max-w-lg bg-white shadow-2xl transition-transform duration-300 ease-in-out overflow-y-auto"
+  [class.translate-x-0]="detailOpen()" [class.translate-x-full]="!detailOpen()">
+
+  <div class="p-6 md:p-8">
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <p class="text-xs tracking-[0.2em] uppercase text-gray-400">Order Details</p>
+        @if (detail()) {
+          <h2 class="text-2xl tracking-wide text-black mt-1" style="font-family:'Cormorant Garamond',serif;">#{{ detail()!.id }}</h2>
+        }
+      </div>
+      <button (click)="closeDetail()" class="text-gray-400 hover:text-black transition-colors">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    @if (detailLoading()) {
+      <div class="flex justify-center py-16"><div class="w-6 h-6 border-2 border-black/20 border-t-black rounded-full animate-spin"></div></div>
+    }
+
+    @if (detail(); as d) {
+
+      <!-- Customer -->
+      <div class="mb-6 pb-6 border-b border-black/10">
+        <p class="text-xs tracking-[0.2em] uppercase text-gray-400 mb-3">Customer</p>
+        <p class="text-sm text-black font-medium">{{ customerName(d) }}</p>
+        <p class="text-sm text-gray-500">{{ d.customer.email }}</p>
+      </div>
+
+      <!-- Shipping -->
+      <div class="mb-6 pb-6 border-b border-black/10">
+        <p class="text-xs tracking-[0.2em] uppercase text-gray-400 mb-3">Ship To</p>
+        <p class="text-sm text-black">{{ d.shipping_full_name }}</p>
+        <p class="text-sm text-gray-500">{{ d.shipping_address }}</p>
+        <p class="text-sm text-gray-500">{{ d.shipping_city }}, {{ d.shipping_postcode }}</p>
+        <p class="text-sm text-gray-500">{{ d.shipping_country }}</p>
+        @if (d.shipping_phone) {
+          <p class="text-sm text-gray-500 mt-1">{{ d.shipping_phone }}</p>
+        }
+      </div>
+
+      <!-- Items -->
+      <div class="mb-6 pb-6 border-b border-black/10">
+        <p class="text-xs tracking-[0.2em] uppercase text-gray-400 mb-3">Items</p>
+        <div class="space-y-3">
+          @for (item of d.items; track item.id) {
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-black">{{ item.variant.product_name }}</p>
+                <p class="text-xs text-gray-400 mt-0.5">
+                  @if (item.variant.size) { Size: {{ item.variant.size }} }
+                  @if (item.variant.size && item.variant.color) { · }
+                  @if (item.variant.color) { {{ item.variant.color }} }
+                  · Qty {{ item.quantity }}
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="text-sm text-black">€{{ item.subtotal | number:'1.2-2' }}</p>
+                <p class="text-xs text-gray-400">€{{ item.price | number:'1.2-2' }} each</p>
+              </div>
+            </div>
+          }
+        </div>
+        <div class="flex justify-between mt-5 pt-4 border-t border-black/10">
+          <p class="text-xs tracking-[0.2em] uppercase text-gray-400">Total</p>
+          <p class="text-lg text-black" style="font-family:'Cormorant Garamond',serif;">€{{ d.total | number:'1.2-2' }}</p>
+        </div>
+      </div>
+
+      <!-- Status Update -->
+      <div>
+        <p class="text-xs tracking-[0.2em] uppercase text-gray-400 mb-3">Update Status</p>
+        @if (statusError()) {
+          <p class="text-xs text-red-500 mb-3">{{ statusError() }}</p>
+        }
+        <div class="flex items-center gap-3">
+          <select [value]="selectedStatus()" (change)="selectedStatus.set($any($event.target).value)"
+            class="flex-1 h-11 px-4 border border-black/20 bg-white text-sm focus:outline-none focus:border-black transition-colors">
+            @for (s of statuses; track s) {
+              <option [value]="s">{{ s | titlecase }}</option>
+            }
+          </select>
+          <button (click)="saveStatus()" [disabled]="statusSaving() || selectedStatus() === d.status"
+            class="h-11 px-6 bg-black text-white text-xs tracking-[0.15em] uppercase hover:bg-black/80 transition-colors disabled:opacity-40">
+            {{ statusSaving() ? '…' : 'Save' }}
+          </button>
+        </div>
+        <p class="text-xs text-gray-400 mt-2">
+          Current: <span class="tracking-wider uppercase px-2 py-0.5 border rounded-sm text-xs" [ngClass]="statusColor(d.status)">{{ d.status }}</span>
+        </p>
+      </div>
+
+    }
+  </div>
+</aside>

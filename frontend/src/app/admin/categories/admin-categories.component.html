@@ -1,0 +1,112 @@
+<div class="p-6 md:p-10">
+
+  <div class="flex items-end justify-between mb-8">
+    <div>
+      <p class="text-xs tracking-[0.25em] uppercase mb-1" style="color:#C9A962;">Catalogue</p>
+      <h1 class="text-3xl tracking-wide text-black" style="font-family:'Cormorant Garamond',serif;font-weight:400;">Categories</h1>
+    </div>
+    @if (!showForm()) {
+      <button (click)="openCreate()"
+        class="flex items-center gap-2 bg-black text-white text-xs tracking-[0.15em] uppercase px-5 py-3 hover:bg-black/80 transition-colors">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Category
+      </button>
+    }
+  </div>
+
+  @if (error()) {
+    <div class="mb-6 px-4 py-3 bg-red-50 border border-red-200 text-sm text-red-600 flex items-center justify-between">
+      {{ error() }}
+      <button (click)="error.set('')" class="text-red-400 hover:text-red-600">✕</button>
+    </div>
+  }
+
+  <!-- Form Panel -->
+  @if (showForm()) {
+    <div class="mb-8 bg-white border border-black/10 p-6 md:p-8">
+      <h2 class="text-xl tracking-wide text-black mb-6" style="font-family:'Cormorant Garamond',serif;">
+        {{ editingId() ? 'Edit Category' : 'New Category' }}
+      </h2>
+
+      @if (formError()) {
+        <p class="text-sm text-red-500 mb-4 tracking-wide">{{ formError() }}</p>
+      }
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+        <div class="flex flex-col gap-2">
+          <label class="text-xs tracking-[0.2em] uppercase text-gray-500">Name *</label>
+          <input type="text" [value]="form().name" (input)="updateField('name', $any($event.target).value)"
+            class="h-11 px-4 border border-black/20 bg-white text-sm focus:outline-none focus:border-black transition-colors" />
+        </div>
+        <div class="flex flex-col gap-2">
+          <label class="text-xs tracking-[0.2em] uppercase text-gray-500">Slug</label>
+          <input type="text" [value]="form().slug" (input)="updateField('slug', $any($event.target).value)"
+            placeholder="auto-generated if blank"
+            class="h-11 px-4 border border-black/20 bg-white text-sm focus:outline-none focus:border-black transition-colors placeholder:text-gray-300" />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2 mb-6">
+        <label class="text-xs tracking-[0.2em] uppercase text-gray-500">Description</label>
+        <textarea [value]="form().description" (input)="updateField('description', $any($event.target).value)"
+          rows="3"
+          class="px-4 py-3 border border-black/20 bg-white text-sm focus:outline-none focus:border-black transition-colors resize-none"></textarea>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button (click)="save()" [disabled]="saving()"
+          class="bg-black text-white text-xs tracking-[0.15em] uppercase px-8 py-3 hover:bg-black/80 transition-colors disabled:opacity-50">
+          {{ saving() ? 'Saving…' : (editingId() ? 'Update' : 'Create') }}
+        </button>
+        <button (click)="cancel()"
+          class="border border-black/20 text-xs tracking-[0.15em] uppercase px-8 py-3 hover:bg-black hover:text-white transition-colors">
+          Cancel
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Table -->
+  @if (loading()) {
+    <div class="flex justify-center py-16"><div class="w-6 h-6 border-2 border-black/20 border-t-black rounded-full animate-spin"></div></div>
+  } @else if (categories().length === 0) {
+    <div class="text-center py-20 bg-white border border-black/10">
+      <p class="text-sm text-gray-400 tracking-wide">No categories yet. Add your first one.</p>
+    </div>
+  } @else {
+    <div class="bg-white border border-black/10 overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-black/10">
+            <th class="text-left px-6 py-4 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal">Name</th>
+            <th class="text-left px-6 py-4 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal">Slug</th>
+            <th class="text-left px-6 py-4 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal hidden md:table-cell">Description</th>
+            <th class="text-center px-6 py-4 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal">Products</th>
+            <th class="text-right px-6 py-4 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-black/5">
+          @for (cat of categories(); track cat.id) {
+            <tr class="hover:bg-black/[0.015] transition-colors">
+              <td class="px-6 py-4 text-sm text-black font-medium">{{ cat.name }}</td>
+              <td class="px-6 py-4 text-sm text-gray-500 font-mono">{{ cat.slug }}</td>
+              <td class="px-6 py-4 text-sm text-gray-500 hidden md:table-cell max-w-xs truncate">{{ cat.description || '—' }}</td>
+              <td class="px-6 py-4 text-sm text-gray-500 text-center">{{ cat.product_count }}</td>
+              <td class="px-6 py-4 text-right">
+                @if (deleteConfirmId() === cat.id) {
+                  <span class="text-xs text-gray-500 mr-2">Delete?</span>
+                  <button (click)="doDelete(cat.id)" class="text-xs text-red-500 hover:text-red-700 uppercase tracking-wider mr-3">Yes</button>
+                  <button (click)="cancelDelete()" class="text-xs text-gray-400 hover:text-black uppercase tracking-wider">No</button>
+                } @else {
+                  <button (click)="openEdit(cat)" class="text-xs tracking-wider uppercase text-gray-500 hover:text-black transition-colors mr-4">Edit</button>
+                  <button (click)="confirmDelete(cat.id)" class="text-xs tracking-wider uppercase text-red-400 hover:text-red-600 transition-colors">Delete</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+</div>

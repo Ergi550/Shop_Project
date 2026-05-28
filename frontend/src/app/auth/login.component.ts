@@ -30,10 +30,14 @@ export class LoginComponent {
     this.loading.set(true);
     this.error.set('');
     this.auth.login(this.email(), this.password()).subscribe({
-      next: () => {
+      next: (user) => {
         this.loading.set(false);
-        this.submitted.set(true);
-        setTimeout(() => this.router.navigate(['/']), 1500);
+        if (user.is_staff) {
+          this.router.navigate(['/admin']);
+        } else {
+          this.submitted.set(true);
+          setTimeout(() => this.router.navigate(['/']), 1500);
+        }
       },
       error: () => {
         this.loading.set(false);
