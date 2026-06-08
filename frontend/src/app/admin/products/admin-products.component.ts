@@ -6,11 +6,15 @@ import { switchMap } from 'rxjs/operators';
 import { AdminService } from '../admin.service';
 import { AdminCategory, AdminProductSummary, AdminProductDetail, AdminVariant } from '../admin-models';
 
-interface LocalVariant {
+interface ColorEntry {
   id?: number;
-  size: string;
   color: string;
   stock: number;
+}
+
+interface SizeGroup {
+  size: string;
+  colors: ColorEntry[];
 }
 
 @Component({
@@ -39,7 +43,7 @@ export class AdminProductsComponent implements OnInit {
     name: '', slug: '', description: '',
     price: '', category: '', available: true,
   });
-  variants = signal<LocalVariant[]>([]);
+  sizeGroups = signal<SizeGroup[]>([]);
   deletedVariantIds = signal<number[]>([]);
   imageFile = signal<File | null>(null);
   imagePreview = signal<string | null>(null);
@@ -72,7 +76,7 @@ export class AdminProductsComponent implements OnInit {
   openCreate(): void {
     this.editingId.set(null);
     this.form.set({ name: '', slug: '', description: '', price: '', category: '', available: true });
-    this.variants.set([]);
+    this.sizeGroups.set([]);
     this.deletedVariantIds.set([]);
     this.imageFile.set(null);
     this.imagePreview.set(null);
@@ -90,7 +94,13 @@ export class AdminProductsComponent implements OnInit {
           name: p.name, slug: p.slug, description: p.description,
           price: String(p.price), category: String(p.category), available: p.available,
         });
-        this.variants.set(p.variants.map(v => ({ id: v.id, size: v.size, color: v.color, stock: v.stock })));
+        // Group flat variants by size
+        const grouped = new Map<string, ColorEntry[]>();
+        for (const v of p.variants) {
+          if (!grouped.has(v.size)) grouped.set(v.size, []);
+          grouped.get(v.size)!.push({ id: v.id, color: v.color, stock: v.stock });
+        }
+        this.sizeGroups.set([...grouped.entries()].map(([size, colors]) => ({ size, colors })));
         this.deletedVariantIds.set([]);
         this.imageFile.set(null);
         this.imagePreview.set(null);
@@ -116,20 +126,45 @@ export class AdminProductsComponent implements OnInit {
     reader.readAsDataURL(file);
   }
 
-  // ── Variants ──────────────────────────────────────────────────────
+  // ── Size Groups ───────────────────────────────────────────────────
 
-  addVariantRow(): void {
-    this.variants.update(v => [...v, { size: '', color: '', stock: 0 }]);
+  addSizeGroup(): void {
+    this.sizeGroups.update(gs => [...gs, { size: '', colors: [{ color: '', stock: 0 }] }]);
   }
 
-  updateVariant(index: number, field: keyof LocalVariant, value: string | number): void {
-    this.variants.update(vs => vs.map((v, i) => i === index ? { ...v, [field]: value } : v));
+  removeSizeGroup(si: number): void {
+    const group = this.sizeGroups()[si];
+    const ids = group.colors.filter(c => c.id).map(c => c.id!);
+    if (ids.length) this.deletedVariantIds.update(prev => [...prev, ...ids]);
+    this.sizeGroups.update(gs => gs.filter((_, i) => i !== si));
   }
 
-  removeVariant(index: number): void {
-    const v = this.variants()[index];
-    if (v.id) this.deletedVariantIds.update(ids => [...ids, v.id!]);
-    this.variants.update(vs => vs.filter((_, i) => i !== index));
+  updateSize(si: number, value: string): void {
+    this.sizeGroups.update(gs => gs.map((g, i) => i === si ? { ...g, size: value } : g));
+  }
+
+  // ── Colors within a size ─────────────────────────────────────────
+
+  addColorToSize(si: number): void {
+    this.sizeGroups.update(gs => gs.map((g, i) =>
+      i === si ? { ...g, colors: [...g.colors, { color: '', stock: 0 }] } : g
+    ));
+  }
+
+  removeColor(si: number, ci: number): void {
+    const entry = this.sizeGroups()[si].colors[ci];
+    if (entry.id) this.deletedVariantIds.update(ids => [...ids, entry.id!]);
+    this.sizeGroups.update(gs => gs.map((g, i) =>
+      i === si ? { ...g, colors: g.colors.filter((_, j) => j !== ci) } : g
+    ));
+  }
+
+  updateColor(si: number, ci: number, field: keyof ColorEntry, value: string | number): void {
+    this.sizeGroups.update(gs => gs.map((g, i) =>
+      i === si
+        ? { ...g, colors: g.colors.map((c, j) => j === ci ? { ...c, [field]: value } : c) }
+        : g
+    ));
   }
 
   // ── Save ──────────────────────────────────────────────────────────
@@ -152,6 +187,11 @@ export class AdminProductsComponent implements OnInit {
     if (f.slug.trim()) fd.append('slug', f.slug.trim());
     if (this.imageFile()) fd.append('image', this.imageFile()!);
 
+    // Flatten size groups → flat variant list
+    const allVariants = this.sizeGroups().flatMap(g =>
+      g.colors.map(c => ({ id: c.id, size: g.size, color: c.color, stock: c.stock }))
+    );
+
     const productObs = this.editingId()
       ? this.svc.updateProduct(this.editingId()!, fd)
       : this.svc.createProduct(fd);
@@ -159,16 +199,13 @@ export class AdminProductsComponent implements OnInit {
     productObs.pipe(
       switchMap(product => {
         const ops: any[] = [];
-        // Delete removed variants
         for (const id of this.deletedVariantIds()) {
           ops.push(this.svc.deleteVariant(id));
         }
-        // Create new variants
-        for (const v of this.variants().filter(v => !v.id)) {
+        for (const v of allVariants.filter(v => !v.id)) {
           ops.push(this.svc.createVariant(product.id, { size: v.size, color: v.color, stock: v.stock }));
         }
-        // Update existing variants
-        for (const v of this.variants().filter(v => !!v.id)) {
+        for (const v of allVariants.filter(v => !!v.id)) {
           ops.push(this.svc.updateVariant(v.id!, { size: v.size, color: v.color, stock: v.stock }));
         }
         return ops.length ? forkJoin(ops) : of(null);

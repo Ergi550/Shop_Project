@@ -3,6 +3,8 @@ export interface Category {
   name: string;
   slug: string;
   description: string;
+  product_count: number;
+  preview_image: string | null;
 }
 
 export interface ProductVariant {

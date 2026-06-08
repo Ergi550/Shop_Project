@@ -21,7 +21,7 @@
       } @else {
         <div class="grid grid-cols-2 md:grid-cols-3 gap-x-4 md:gap-x-8 gap-y-10 md:gap-y-16">
           @for (item of items(); track item.productId) {
-            <div class="group relative" [class.opacity-40]="isMoving(item.productId)" [class.transition-opacity]="true" [class.duration-500]="true">
+            <div class="group relative">
 
               <a [routerLink]="['/product', item.slug]" class="block">
                 <div class="aspect-[3/4] overflow-hidden mb-3 md:mb-5 relative" style="background-color: #E8E4DD;">
@@ -53,9 +53,9 @@
               </div>
 
               <div class="flex gap-2">
-                <button (click)="moveToCart(item.productId)"
+                <button (click)="moveToCart(item.slug)"
                         class="flex-1 py-2.5 md:py-3 text-xs tracking-[0.2em] uppercase bg-black text-white hover:bg-black/80 transition-colors duration-300">
-                  @if (isMoving(item.productId)) { Added ✓ } @else { Move to Bag }
+                  Move to Bag
                 </button>
                 <button (click)="remove(item.productId)"
                         class="w-10 h-9 md:w-12 md:h-10 flex items-center justify-center border border-black/20 hover:border-black transition-colors duration-200"

@@ -1,10 +1,11 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { LayoutComponent } from '../layout/layout.component';
+import { CategoryService } from '../core/services/category.service';
 
-interface Category {
-  id: string;
+interface HomeCategory {
+  id: number;
   name: string;
   slug: string;
   imageUrl: string;
@@ -17,39 +18,30 @@ interface Category {
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
 })
-export class HomeComponent {
-  isPlaying = signal(true);
+export class HomeComponent implements OnInit {
+  private categoryService = inject(CategoryService);
 
-  categories: Category[] = [
-    {
-      id: '1',
-      name: 'Dresses',
-      slug: 'dresses',
-      imageUrl: 'https://images.unsplash.com/photo-1568251188392-ae32f898cb3b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    },
-    {
-      id: '2',
-      name: 'Tops',
-      slug: 'tops',
-      imageUrl: 'https://images.unsplash.com/photo-1764337593519-c51a77b4fc3d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    },
-    {
-      id: '3',
-      name: 'Shoes',
-      slug: 'shoes',
-      imageUrl: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    },
-    {
-      id: '4',
-      name: 'Accessories',
-      slug: 'accessories',
-      imageUrl: 'https://images.unsplash.com/photo-1705909237050-7a7625b47fac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
-    },
-  ];
+  isPlaying = signal(true);
+  categories: HomeCategory[] = [];
 
   featureImageUrl = 'https://images.unsplash.com/flagged/photo-1570733117311-d990c3816c47?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080';
   featureCaption = 'Where timeless elegance meets modern sophistication';
   featureCtaText = 'Explore Lookbook';
+
+  ngOnInit(): void {
+    this.categoryService.getCategories().subscribe(cats => {
+      this.categories = cats
+        .filter(c => c.product_count > 0 && c.preview_image)
+        .sort((a, b) => b.product_count - a.product_count)
+        .slice(0, 4)
+        .map(c => ({
+          id: c.id,
+          name: c.name,
+          slug: c.slug,
+          imageUrl: c.preview_image!,
+        }));
+    });
+  }
 
   togglePlay(videoEl: HTMLVideoElement): void {
     if (this.isPlaying()) {

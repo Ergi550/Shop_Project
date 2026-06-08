@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from django.db import transaction
+from django.db.models import Count, OuterRef, Q, Subquery
 from .models import Category, Product, ProductVariant, Order, OrderItem
 from .serializers import (
     CategorySerializer,
@@ -32,9 +33,18 @@ class ProductDetailView(generics.RetrieveAPIView):
 
 
 class CategoryListView(generics.ListAPIView):
-    queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        first_image = Product.objects.filter(
+            category=OuterRef('pk'),
+            available=True,
+        ).exclude(image='').values('image')[:1]
+        return Category.objects.annotate(
+            product_count=Count('products', filter=Q(products__available=True)),
+            first_product_image=Subquery(first_image),
+        )
 
 
 # --- Protected order endpoints ---
@@ -119,5 +129,8 @@ class MeView(APIView):
 
     def get(self, request):
         u = request.user
-        return Response({'id': u.id, 'username': u.username, 'email': u.email,
-                         'first_name': u.first_name, 'last_name': u.last_name})
+        return Response({
+            'id': u.id, 'username': u.username, 'email': u.email,
+            'first_name': u.first_name, 'last_name': u.last_name,
+            'is_staff': u.is_staff,
+        })

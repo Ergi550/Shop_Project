@@ -110,7 +110,9 @@
 
   <div class="fixed top-0 left-0 right-0 z-50 bg-white transition-transform duration-500 ease-in-out"
        [class.translate-y-0]="searchOpen()" [class.-translate-y-full]="!searchOpen()">
-    <div class="max-w-[1440px] mx-auto px-4 md:px-8 py-6 md:py-12">
+    <div class="max-w-[1440px] mx-auto px-4 md:px-8 py-6 md:py-10">
+
+      <!-- Header -->
       <div class="flex items-center justify-between mb-6 md:mb-8">
         <span class="text-sm tracking-[0.2em] uppercase text-gray-500">Search</span>
         <button (click)="closeSearch()" class="hover:opacity-60 transition-opacity" aria-label="Close search">
@@ -119,15 +121,51 @@
           </svg>
         </button>
       </div>
-      <input type="text" placeholder="What are you looking for?"
+
+      <!-- Input -->
+      <input type="text"
+             [value]="searchQuery()"
+             (input)="onSearchInput($any($event.target).value)"
+             placeholder="What are you looking for?"
              class="w-full border-b border-black/30 pb-3 md:pb-4 text-xl md:text-3xl bg-transparent focus:outline-none focus:border-black transition-colors"
-             style="font-family: Cormorant, serif;" />
-      <div class="mt-6 flex flex-wrap gap-3 text-sm tracking-wider uppercase text-gray-500">
-        <span class="text-gray-400">Popular:</span>
-        <a routerLink="/category/dresses" (click)="closeSearch()" class="hover:text-black transition-colors">Dresses</a>
-        <a routerLink="/category/new-arrivals" (click)="closeSearch()" class="hover:text-black transition-colors">New In</a>
-        <a routerLink="/category/sale" (click)="closeSearch()" class="hover:text-black transition-colors">Sale</a>
-      </div>
+             style="font-family: Cormorant, serif;"
+             autocomplete="off" />
+
+      <!-- Results -->
+      @if (searchQuery().length >= 2 && searchResults().length > 0) {
+        <div class="mt-4 max-h-[60vh] overflow-y-auto">
+          @for (product of searchResults(); track product.id) {
+            <button (click)="selectSearchResult(product.slug)"
+                    class="w-full flex items-center gap-4 py-3.5 border-b border-black/8 hover:bg-black/[0.02] transition-colors text-left">
+              <div class="w-11 h-14 shrink-0 overflow-hidden" style="background-color: #E8E4DD;">
+                <img [src]="productImageUrl(product)" [alt]="product.name"
+                     class="w-full h-full object-cover" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs tracking-[0.2em] uppercase text-gray-400 mb-0.5">{{ product.category.name }}</p>
+                <p class="text-base md:text-lg tracking-wide truncate" style="font-family: Cormorant, serif;">{{ product.name }}</p>
+              </div>
+              <p class="text-sm text-gray-500 shrink-0 pr-1">€ {{ product.price }}</p>
+            </button>
+          }
+        </div>
+
+      } @else if (searchQuery().length >= 2 && searchResults().length === 0) {
+        <div class="mt-8 py-6 text-center">
+          <p class="text-gray-400 tracking-wide" style="font-family: Cormorant, serif; font-size: 1.1rem;">
+            No results for &ldquo;{{ searchQuery() }}&rdquo;
+          </p>
+        </div>
+
+      } @else {
+        <div class="mt-6 flex flex-wrap gap-3 text-sm tracking-wider uppercase text-gray-500">
+          <span class="text-gray-400">Popular:</span>
+          <a routerLink="/category/dresses" (click)="closeSearch()" class="hover:text-black transition-colors">Dresses</a>
+          <a routerLink="/category/new-arrivals" (click)="closeSearch()" class="hover:text-black transition-colors">New In</a>
+          <a routerLink="/category/sale" (click)="closeSearch()" class="hover:text-black transition-colors">Sale</a>
+        </div>
+      }
+
     </div>
   </div>
 
@@ -189,12 +227,9 @@
         <div>
           <h3 class="text-sm tracking-[0.2em] uppercase mb-5 md:mb-6">Shop</h3>
           <ul class="space-y-3">
-            <li><a routerLink="/category/new-arrivals" class="text-sm text-gray-400 hover:text-white transition-colors">New Arrivals</a></li>
-            <li><a routerLink="/category/dresses" class="text-sm text-gray-400 hover:text-white transition-colors">Dresses</a></li>
-            <li><a routerLink="/category/tops" class="text-sm text-gray-400 hover:text-white transition-colors">Tops</a></li>
-            <li><a routerLink="/category/shoes" class="text-sm text-gray-400 hover:text-white transition-colors">Shoes</a></li>
-            <li><a routerLink="/category/accessories" class="text-sm text-gray-400 hover:text-white transition-colors">Accessories</a></li>
-            <li><a routerLink="/category/sale" class="text-sm text-gray-400 hover:text-white transition-colors">Sale</a></li>
+            @for (cat of categories; track cat.slug) {
+              <li><a [routerLink]="['/category', cat.slug]" class="text-sm text-gray-400 hover:text-white transition-colors">{{ cat.name }}</a></li>
+            }
           </ul>
         </div>
         <div>
@@ -217,12 +252,13 @@
           </ul>
         </div>
         <div class="col-span-2 md:col-span-1">
-          <h3 class="text-sm tracking-[0.2em] uppercase mb-5 md:mb-6">Newsletter</h3>
-          <p class="text-sm text-gray-400 mb-4">Subscribe for updates and exclusive deals.</p>
-          <div class="flex gap-2">
-            <input type="email" placeholder="Enter your email"
-                   class="bg-white/10 border border-white/20 text-white placeholder:text-gray-500 h-11 px-3 flex-1 min-w-0" />
-            <button class="text-white px-4 md:px-6 h-11 shrink-0" style="background-color: #C9A962;">Subscribe</button>
+          <h3 class="text-sm tracking-[0.2em] uppercase mb-5 md:mb-6">Find Us</h3>
+          <div class="w-full overflow-hidden" style="height: 200px;">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d325.83062186142956!2d19.826521735659522!3d41.34058596904878!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1sen!2s!4v1780910181595!5m2!1sen!2s"
+              width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
           </div>
         </div>
       </div>

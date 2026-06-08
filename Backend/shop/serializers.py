@@ -1,11 +1,28 @@
 from rest_framework import serializers
+from django.conf import settings
 from .models import Category, Product, ProductVariant, Order, OrderItem
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    product_count = serializers.SerializerMethodField()
+    preview_image = serializers.SerializerMethodField()
+
     class Meta:
         model = Category
-        fields = ["id", "name", "slug", "description"]
+        fields = ["id", "name", "slug", "description", "product_count", "preview_image"]
+
+    def get_product_count(self, obj):
+        return getattr(obj, 'product_count', 0)
+
+    def get_preview_image(self, obj):
+        image_path = getattr(obj, 'first_product_image', None)
+        if not image_path:
+            return None
+        url = f'{settings.MEDIA_URL}{image_path}'
+        request = self.context.get('request')
+        if request:
+            return request.build_absolute_uri(url)
+        return url
 
 
 class ProductVariantSerializer(serializers.ModelSerializer):

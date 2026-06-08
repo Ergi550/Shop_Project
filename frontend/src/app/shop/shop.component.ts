@@ -1,22 +1,14 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { LayoutComponent } from '../layout/layout.component';
 import { ProductService } from '../core/services/product.service';
-import { Product } from '../core/models';
+import { CategoryService } from '../core/services/category.service';
+import { WishlistService } from '../core/services/wishlist.service';
+import { Category, Product } from '../core/models';
 import { productImage } from '../core/product-images';
-
-const CATEGORY_TITLES: Record<string, string> = {
-  all: 'All Products',
-  dresses: 'Dresses',
-  tops: 'Tops',
-  shoes: 'Shoes',
-  accessories: 'Accessories',
-  'new-arrivals': 'New Arrivals',
-  sale: 'Sale',
-};
 
 const NEW_ARRIVAL_DAYS = 60;
 
@@ -29,6 +21,8 @@ const NEW_ARRIVAL_DAYS = 60;
 export class ShopComponent {
   private route = inject(ActivatedRoute);
   private productService = inject(ProductService);
+  private categoryService = inject(CategoryService);
+  wishlist = inject(WishlistService);
 
   private slugParam = toSignal(
     this.route.paramMap.pipe(map(p => p.get('slug') ?? 'all')),
@@ -36,6 +30,26 @@ export class ShopComponent {
   );
 
   sortBy = signal('featured');
+  sortOpen = signal(false);
+
+  readonly sortOptions = [
+    { value: 'featured',   label: 'Featured' },
+    { value: 'newest',     label: 'New In' },
+    { value: 'price-asc',  label: 'Price: Low — High' },
+    { value: 'price-desc', label: 'Price: High — Low' },
+  ];
+
+  sortLabel = computed(() => this.sortOptions.find(o => o.value === this.sortBy())?.label ?? 'Featured');
+
+  setSortBy(value: string): void {
+    this.sortBy.set(value);
+    this.sortOpen.set(false);
+  }
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.sortOpen.set(false);
+  }
 
   private allProductsRaw = toSignal(this.productService.getProducts());
   readonly loading = computed(() => this.allProductsRaw() === undefined);
@@ -43,24 +57,34 @@ export class ShopComponent {
 
   private allProducts = computed<Product[]>(() => this.allProductsRaw() ?? []);
 
-  readonly filterTabs = [
-    { label: 'All',         slug: 'all' },
-    { label: 'Dresses',     slug: 'dresses' },
-    { label: 'Tops',        slug: 'tops' },
-    { label: 'Shoes',       slug: 'shoes' },
-    { label: 'Accessories', slug: 'accessories' },
-  ];
+  private backendCategories = toSignal(this.categoryService.getCategories(), { initialValue: [] as Category[] });
 
-  categoryTitle = computed(() => CATEGORY_TITLES[this.slugParam()] ?? 'Shop');
+  readonly filterTabs = computed(() => [
+    { label: 'All', slug: 'all' },
+    ...this.backendCategories().map(c => ({ label: c.name, slug: c.slug })),
+  ]);
+
+  categoryTitle = computed(() => {
+    const slug = this.slugParam();
+    if (slug === 'all') return 'All Products';
+    if (slug === 'new-arrivals') return 'New Arrivals';
+    if (slug === 'sale') return 'Sale';
+    const cat = this.backendCategories().find(c => c.slug === slug);
+    return cat ? cat.name : 'Shop';
+  });
 
   breadcrumb = computed(() => {
     const slug = this.slugParam();
-    return slug && slug !== 'all' ? (CATEGORY_TITLES[slug] ?? slug) : null;
+    if (!slug || slug === 'all') return null;
+    if (slug === 'new-arrivals') return 'New Arrivals';
+    if (slug === 'sale') return 'Sale';
+    const cat = this.backendCategories().find(c => c.slug === slug);
+    return cat ? cat.name : slug;
   });
 
   activeTab = computed(() => {
     const slug = this.slugParam();
-    return this.filterTabs.some(t => t.slug === slug) ? slug : 'all';
+    return this.filterTabs().some(t => t.slug === slug) ? slug : 'all';
   });
 
   filteredProducts = computed(() => {
@@ -97,5 +121,19 @@ export class ShopComponent {
 
   imageUrl(product: Product): string {
     return productImage(product.slug, product.image);
+  }
+
+  toggleWishlist(event: Event, product: Product): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.wishlist.toggle({
+      productId: product.id,
+      name: product.name,
+      slug: product.slug,
+      imageUrl: this.imageUrl(product),
+      price: Number(product.price),
+      category: product.category?.name,
+      isNew: this.isNew(product),
+    });
   }
 }

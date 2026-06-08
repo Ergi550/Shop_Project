@@ -32,6 +32,12 @@ export class ProductDetailComponent {
     { initialValue: '' }
   );
 
+  readonly fromWishlist = toSignal(
+    this.route.queryParamMap.pipe(map(q => q.get('from') === 'wishlist')),
+    { initialValue: false }
+  );
+  wishlistPopupDismissed = signal(false);
+
   private productRaw = toSignal<Product | null>(
     toObservable(this.slug).pipe(
       switchMap(slug =>
