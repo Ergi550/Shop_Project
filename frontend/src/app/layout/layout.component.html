@@ -1,4 +1,214 @@
 <div class="min-h-screen bg-white">
+
+  <!-- ===================== CONTACT MODAL ===================== -->
+  @if (contactOpen()) {
+    <div class="fixed inset-0 z-[60] flex items-center justify-center px-4" (click)="contactOpen.set(false)">
+      <div class="absolute inset-0 bg-black/40"></div>
+      <div class="relative bg-white w-full max-w-md shadow-2xl" (click)="$event.stopPropagation()">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 py-5 border-b border-black/10">
+          <div>
+            <p class="text-xs tracking-[0.3em] uppercase mb-0.5" style="color:#C9A962;">Get in Touch</p>
+            <h2 class="text-2xl tracking-wide" style="font-family:Cormorant,serif;font-weight:400;">Contact Us</h2>
+          </div>
+          <button (click)="contactOpen.set(false)" class="hover:opacity-50 transition-opacity" aria-label="Close">
+            <svg class="w-5 h-5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Contact details -->
+        <div class="divide-y divide-black/6">
+
+          <a href="mailto:hello@geris.al"
+             class="flex items-center gap-4 px-6 py-4 hover:bg-black/[0.02] transition-colors group">
+            <div class="w-9 h-9 border border-black/10 flex items-center justify-center shrink-0 group-hover:border-black transition-colors">
+              <svg class="w-4 h-4 text-gray-400 group-hover:text-black transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-xs tracking-[0.2em] uppercase text-gray-400 mb-0.5">Email</p>
+              <p class="text-sm text-black" style="font-family:Cormorant,serif;font-size:1rem;">hello&#64;geris.al</p>
+            </div>
+          </a>
+
+          <a href="tel:+355691234567"
+             class="flex items-center gap-4 px-6 py-4 hover:bg-black/[0.02] transition-colors group">
+            <div class="w-9 h-9 border border-black/10 flex items-center justify-center shrink-0 group-hover:border-black transition-colors">
+              <svg class="w-4 h-4 text-gray-400 group-hover:text-black transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-xs tracking-[0.2em] uppercase text-gray-400 mb-0.5">Phone</p>
+              <p class="text-sm text-black" style="font-family:Cormorant,serif;font-size:1rem;">+355 69 123 4567</p>
+            </div>
+          </a>
+
+          <a href="https://instagram.com/geris.style" target="_blank" rel="noopener"
+             class="flex items-center gap-4 px-6 py-4 hover:bg-black/[0.02] transition-colors group">
+            <div class="w-9 h-9 border border-black/10 flex items-center justify-center shrink-0 group-hover:border-black transition-colors">
+              <svg class="w-4 h-4 text-gray-400 group-hover:text-black transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-xs tracking-[0.2em] uppercase text-gray-400 mb-0.5">Instagram</p>
+              <p class="text-sm text-black" style="font-family:Cormorant,serif;font-size:1rem;">&#64;geris.style</p>
+            </div>
+          </a>
+
+          <div class="flex items-center gap-4 px-6 py-4">
+            <div class="w-9 h-9 border border-black/10 flex items-center justify-center shrink-0">
+              <svg class="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-xs tracking-[0.2em] uppercase text-gray-400 mb-0.5">Address</p>
+              <p class="text-sm text-black" style="font-family:Cormorant,serif;font-size:1rem;">Rruga 5 Maj, Tirana</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Opening hours -->
+        <div class="px-6 py-5 border-t border-black/10" style="background-color:#FAF8F5;">
+          <p class="text-xs tracking-[0.2em] uppercase text-black mb-4">Opening Hours</p>
+          <div class="space-y-2">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-400 tracking-wide text-xs uppercase">Mon – Sun</span>
+              <span style="font-family:Cormorant,serif;font-size:0.95rem;">8:00 – 16:00</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- ===================== SIZE GUIDE MODAL ===================== -->
+  @if (sizeGuide.isOpen()) {
+    <div class="fixed inset-0 z-[60] flex items-center justify-center px-4" (click)="sizeGuide.close()">
+      <div class="absolute inset-0 bg-black/40"></div>
+      <div class="relative bg-white w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl" (click)="$event.stopPropagation()">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 py-5 border-b border-black/10 shrink-0">
+          <div>
+            <p class="text-xs tracking-[0.3em] uppercase mb-0.5" style="color:#C9A962;">Reference</p>
+            <h2 class="text-2xl tracking-wide" style="font-family:Cormorant,serif;font-weight:400;">Size Guide</h2>
+          </div>
+          <button (click)="sizeGuide.close()" class="hover:opacity-50 transition-opacity" aria-label="Close">
+            <svg class="w-5 h-5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex border-b border-black/10 shrink-0 px-6">
+          <button (click)="sizeGuideTab.set('clothing')"
+                  class="py-3.5 mr-8 text-xs tracking-[0.2em] uppercase border-b-2 -mb-px transition-colors"
+                  [class.border-black]="sizeGuideTab() === 'clothing'"
+                  [class.text-black]="sizeGuideTab() === 'clothing'"
+                  [class.border-transparent]="sizeGuideTab() !== 'clothing'"
+                  [class.text-gray-400]="sizeGuideTab() !== 'clothing'">Clothing</button>
+          <button (click)="sizeGuideTab.set('shoes')"
+                  class="py-3.5 text-xs tracking-[0.2em] uppercase border-b-2 -mb-px transition-colors"
+                  [class.border-black]="sizeGuideTab() === 'shoes'"
+                  [class.text-black]="sizeGuideTab() === 'shoes'"
+                  [class.border-transparent]="sizeGuideTab() !== 'shoes'"
+                  [class.text-gray-400]="sizeGuideTab() !== 'shoes'">Shoes</button>
+        </div>
+
+        <!-- Content -->
+        <div class="overflow-y-auto flex-1 px-6 py-6">
+
+          @if (sizeGuideTab() === 'clothing') {
+            <p class="text-xs text-gray-400 tracking-wide mb-4">All measurements in centimetres. If you are between sizes, we recommend sizing up.</p>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm min-w-[540px]">
+                <thead>
+                  <tr style="background-color:#FAF8F5;">
+                    <th class="text-left px-4 py-3 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal border-b border-black/10">Size</th>
+                    <th class="text-center px-4 py-3 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal border-b border-black/10">EU</th>
+                    <th class="text-center px-4 py-3 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal border-b border-black/10">UK</th>
+                    <th class="text-center px-4 py-3 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal border-b border-black/10">US</th>
+                    <th class="text-center px-4 py-3 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal border-b border-black/10">Bust</th>
+                    <th class="text-center px-4 py-3 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal border-b border-black/10">Waist</th>
+                    <th class="text-center px-4 py-3 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal border-b border-black/10">Hips</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-black/5">
+                  @for (row of clothingSizes; track row.label) {
+                    <tr class="hover:bg-black/[0.015] transition-colors">
+                      <td class="px-4 py-3 font-medium text-black tracking-wide" style="font-family:Cormorant,serif;font-size:1rem;">{{ row.label }}</td>
+                      <td class="px-4 py-3 text-center text-gray-600">{{ row.eu }}</td>
+                      <td class="px-4 py-3 text-center text-gray-600">{{ row.uk }}</td>
+                      <td class="px-4 py-3 text-center text-gray-600">{{ row.us }}</td>
+                      <td class="px-4 py-3 text-center text-gray-600 text-xs">{{ row.bust }}</td>
+                      <td class="px-4 py-3 text-center text-gray-600 text-xs">{{ row.waist }}</td>
+                      <td class="px-4 py-3 text-center text-gray-600 text-xs">{{ row.hips }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <!-- How to measure -->
+            <div class="mt-6 pt-6 border-t border-black/8 grid grid-cols-1 sm:grid-cols-3 gap-5">
+              <div>
+                <p class="text-xs tracking-[0.2em] uppercase text-black mb-1.5">Bust</p>
+                <p class="text-xs text-gray-500 leading-relaxed">Measure around the fullest part of your chest, keeping the tape horizontal.</p>
+              </div>
+              <div>
+                <p class="text-xs tracking-[0.2em] uppercase text-black mb-1.5">Waist</p>
+                <p class="text-xs text-gray-500 leading-relaxed">Measure the narrowest part of your natural waist, usually just above the navel.</p>
+              </div>
+              <div>
+                <p class="text-xs tracking-[0.2em] uppercase text-black mb-1.5">Hips</p>
+                <p class="text-xs text-gray-500 leading-relaxed">Measure around the widest point of your hips, approximately 20 cm below your waist.</p>
+              </div>
+            </div>
+          }
+
+          @if (sizeGuideTab() === 'shoes') {
+            <p class="text-xs text-gray-400 tracking-wide mb-4">Measure foot length from heel to longest toe. If between sizes, size up.</p>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm min-w-[360px]">
+                <thead>
+                  <tr style="background-color:#FAF8F5;">
+                    <th class="text-center px-4 py-3 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal border-b border-black/10">EU</th>
+                    <th class="text-center px-4 py-3 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal border-b border-black/10">UK</th>
+                    <th class="text-center px-4 py-3 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal border-b border-black/10">US</th>
+                    <th class="text-center px-4 py-3 text-xs tracking-[0.2em] uppercase text-gray-400 font-normal border-b border-black/10">Length (cm)</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-black/5">
+                  @for (row of shoeSizes; track row.eu) {
+                    <tr class="hover:bg-black/[0.015] transition-colors">
+                      <td class="px-4 py-3 text-center font-medium text-black" style="font-family:Cormorant,serif;font-size:1rem;">{{ row.eu }}</td>
+                      <td class="px-4 py-3 text-center text-gray-600">{{ row.uk }}</td>
+                      <td class="px-4 py-3 text-center text-gray-600">{{ row.us }}</td>
+                      <td class="px-4 py-3 text-center text-gray-600">{{ row.length }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <div class="mt-6 pt-6 border-t border-black/8">
+              <p class="text-xs tracking-[0.2em] uppercase text-black mb-1.5">How to measure</p>
+              <p class="text-xs text-gray-500 leading-relaxed max-w-md">Place your foot on a flat surface and measure from the back of your heel to the tip of your longest toe. Measure both feet in the afternoon (feet swell slightly during the day) and use the larger measurement.</p>
+            </div>
+          }
+
+        </div>
+      </div>
+    </div>
+  }
   <!-- ===================== NAVIGATION ===================== -->
   <nav
     class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
@@ -97,7 +307,7 @@
           <a routerLink="/login" (click)="closeMenu()" class="hover:text-black transition-colors">Account</a>
         }
         <a routerLink="/wishlist" (click)="closeMenu()" class="hover:text-black transition-colors">Wishlist</a>
-        <a href="#" class="hover:text-black transition-colors">Contact Us</a>
+        <button (click)="contactOpen.set(true); closeMenu()" class="hover:text-black transition-colors text-left">Contact Us</button>
       </div>
     </div>
   </aside>
@@ -237,9 +447,9 @@
           <ul class="space-y-3">
             <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Customer Service</a></li>
             <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Shipping &amp; Returns</a></li>
-            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Size Guide</a></li>
+            <li><button (click)="sizeGuide.open(); sizeGuideTab.set('clothing')" class="text-sm text-gray-400 hover:text-white transition-colors">Size Guide</button></li>
             <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Track Order</a></li>
-            <li><a href="#" class="text-sm text-gray-400 hover:text-white transition-colors">Contact Us</a></li>
+            <li><button (click)="contactOpen.set(true)" class="text-sm text-gray-400 hover:text-white transition-colors">Contact Us</button></li>
           </ul>
         </div>
         <div>
@@ -262,9 +472,29 @@
           </div>
         </div>
       </div>
-      <div class="border-t border-white/10 pt-8 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+      <div class="border-t border-white/10 pt-8 grid grid-cols-3 items-center">
         <p class="text-sm text-gray-500">© 2026 Geri's. All rights reserved.</p>
-        <div class="flex gap-6">
+        <div class="flex justify-center gap-5">
+          <a href="#" aria-label="Instagram" class="text-gray-500 hover:text-white transition-colors">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+            </svg>
+          </a>
+          <a href="#" aria-label="Facebook" class="text-gray-500 hover:text-white transition-colors">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+            </svg>
+          </a>
+          <a href="#" aria-label="Telegram" class="text-gray-500 hover:text-white transition-colors">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21.5 2.5 2.5 9.75l7.25 2.25 2.25 7.25 3.5-4.5 4.75 3.75z"/>
+              <line x1="9.75" y1="12" x2="14.5" y2="7.5"/>
+            </svg>
+          </a>
+        </div>
+        <div class="flex gap-6 justify-end">
           <a href="#" class="text-sm text-gray-500 hover:text-white transition-colors">Privacy Policy</a>
           <a href="#" class="text-sm text-gray-500 hover:text-white transition-colors">Terms of Service</a>
         </div>

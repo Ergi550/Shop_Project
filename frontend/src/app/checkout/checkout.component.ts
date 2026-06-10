@@ -20,6 +20,7 @@ export class CheckoutComponent {
   step = signal<'shipping' | 'payment'>('shipping');
   loading = signal(false);
   error = signal('');
+  formTouched = signal(false);
 
   form = signal({
     firstName: '',
@@ -31,6 +32,17 @@ export class CheckoutComponent {
     postcode: '',
     country: '',
   });
+
+  shippingValid = computed(() => {
+    const f = this.form();
+    return !!(f.firstName.trim() && f.lastName.trim() && f.email.trim() &&
+              f.phone.trim() && f.address.trim() && f.city.trim() &&
+              f.postcode.trim() && f.country);
+  });
+
+  fieldError(field: 'firstName' | 'lastName' | 'email' | 'phone' | 'address' | 'city' | 'postcode') {
+    return this.formTouched() && !this.form()[field].trim();
+  }
 
   get orderItems() { return this.cartService.items; }
   get subtotal() { return this.cartService.subtotal; }
@@ -50,6 +62,8 @@ export class CheckoutComponent {
   }
 
   proceedToPayment(): void {
+    this.formTouched.set(true);
+    if (!this.shippingValid()) return;
     this.step.set('payment');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }

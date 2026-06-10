@@ -9,6 +9,7 @@ import { CartService } from '../core/services/cart.service';
 import { WishlistService } from '../core/services/wishlist.service';
 import { Product } from '../core/models';
 import { productImages, COLOR_HEX, PLACEHOLDER_IMAGE } from '../core/product-images';
+import { SizeGuideService } from '../core/services/size-guide.service';
 
 interface DisplayColor {
   name: string;
@@ -26,6 +27,7 @@ export class ProductDetailComponent {
   private productService = inject(ProductService);
   private cartService = inject(CartService);
   private wishlistService = inject(WishlistService);
+  sizeGuide = inject(SizeGuideService);
 
   private slug = toSignal(
     this.route.paramMap.pipe(map(p => p.get('slug') ?? '')),

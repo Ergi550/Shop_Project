@@ -154,9 +154,9 @@
           <div class="mb-6 md:mb-8">
             <div class="flex items-center justify-between mb-3 md:mb-4">
               <span class="text-xs tracking-[0.2em] uppercase">Size</span>
-              <a href="#" class="text-xs tracking-wider text-gray-400 underline hover:text-black transition-colors">
+              <button (click)="sizeGuide.open()" class="text-xs tracking-wider text-gray-400 underline hover:text-black transition-colors">
                 Size Guide
-              </a>
+              </button>
             </div>
             <div class="flex flex-wrap gap-2">
               @for (size of sizes(); track size) {

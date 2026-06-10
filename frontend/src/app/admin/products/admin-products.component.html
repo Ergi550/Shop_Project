@@ -215,24 +215,25 @@
                   class="h-9 px-3 border border-black/20 text-sm focus:outline-none focus:border-black transition-colors w-36" />
                 <button (click)="removeSizeGroup(si)"
                   class="ml-auto flex items-center gap-1 text-xs tracking-[0.12em] uppercase text-red-400 hover:text-red-600 transition-colors">
-                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/>
                   </svg>
-                  Remove Size
+                  <span class="hidden sm:inline">Remove Size</span>
                 </button>
               </div>
 
               <!-- Color rows for this size -->
-              <div class="ml-16">
+              <div class="ml-0 md:ml-16">
                 @if (group.colors.length > 0) {
                   <div class="hidden md:grid grid-cols-[1fr_90px_36px] gap-3 mb-2 px-1">
                     <span class="text-xs tracking-[0.15em] uppercase text-gray-400">Color</span>
                     <span class="text-xs tracking-[0.15em] uppercase text-gray-400">Stock</span>
                     <span></span>
                   </div>
-                  <div class="space-y-2 mb-3">
+                  <div class="space-y-3 mb-3">
                     @for (c of group.colors; track $index; let ci = $index) {
-                      <div class="grid grid-cols-[1fr_90px_36px] gap-3 items-center">
+                      <!-- Mobile: stacked; Desktop: 3-col grid -->
+                      <div class="flex flex-col gap-2 md:grid md:grid-cols-[1fr_90px_36px] md:gap-3 md:items-center">
                         <!-- Color input with live swatch -->
                         <div class="flex items-center gap-2">
                           <span class="w-5 h-5 rounded-full border border-black/20 shrink-0 transition-colors"
@@ -242,15 +243,19 @@
                             placeholder="Black / #1a1a1a…"
                             class="h-9 px-3 border border-black/20 text-sm focus:outline-none focus:border-black transition-colors flex-1" />
                         </div>
-                        <input type="number" min="0" [value]="c.stock"
-                          (input)="updateColor(si, ci, 'stock', +$any($event.target).value)"
-                          class="h-9 px-3 border border-black/20 text-sm focus:outline-none focus:border-black transition-colors" />
-                        <button (click)="removeColor(si, ci)"
-                          class="h-9 w-9 flex items-center justify-center text-red-400 hover:text-red-600 transition-colors border border-transparent hover:border-red-200">
-                          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/>
-                          </svg>
-                        </button>
+                        <!-- Stock + delete: side by side on mobile, separate cells on desktop -->
+                        <div class="flex items-center gap-2 md:contents">
+                          <input type="number" min="0" [value]="c.stock"
+                            (input)="updateColor(si, ci, 'stock', +$any($event.target).value)"
+                            placeholder="Stock"
+                            class="h-9 px-3 border border-black/20 text-sm focus:outline-none focus:border-black transition-colors w-24 md:w-full" />
+                          <button (click)="removeColor(si, ci)"
+                            class="h-9 w-9 flex items-center justify-center text-red-400 hover:text-red-600 transition-colors border border-transparent hover:border-red-200 shrink-0">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                              <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/>
+                            </svg>
+                          </button>
+                        </div>
                       </div>
                     }
                   </div>
@@ -269,7 +274,7 @@
     </div>
 
     <!-- Save -->
-    <div class="flex items-center gap-3">
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
       <button (click)="save()" [disabled]="saving()"
         class="bg-black text-white text-xs tracking-[0.15em] uppercase px-10 py-3.5 hover:bg-black/80 transition-colors disabled:opacity-50">
         {{ saving() ? 'Saving…' : (editingId() ? 'Update Product' : 'Create Product') }}

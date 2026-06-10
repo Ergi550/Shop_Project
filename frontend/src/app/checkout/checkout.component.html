@@ -28,72 +28,109 @@
                 <!-- Name row -->
                 <div class="grid grid-cols-2 gap-4">
                   <div class="flex flex-col gap-2">
-                    <label class="text-xs tracking-[0.2em] uppercase text-gray-500">First Name</label>
+                    <label class="text-xs tracking-[0.2em] uppercase text-gray-500">First Name <span class="text-red-400">*</span></label>
                     <input type="text" [value]="form().firstName"
                            (input)="updateField('firstName', $any($event.target).value)"
                            placeholder="Ergi"
-                           class="h-12 px-4 border border-black/20 bg-white text-sm focus:outline-none focus:border-black transition-colors placeholder:text-gray-300" />
+                           class="h-12 px-4 border bg-white text-sm focus:outline-none focus:border-black transition-colors placeholder:text-gray-300"
+                           [class.border-red-400]="fieldError('firstName')"
+                           [class.border-black/20]="!fieldError('firstName')" />
+                    @if (fieldError('firstName')) {
+                      <span class="text-xs text-red-400 tracking-wide">Required</span>
+                    }
                   </div>
                   <div class="flex flex-col gap-2">
-                    <label class="text-xs tracking-[0.2em] uppercase text-gray-500">Last Name</label>
+                    <label class="text-xs tracking-[0.2em] uppercase text-gray-500">Last Name <span class="text-red-400">*</span></label>
                     <input type="text" [value]="form().lastName"
                            (input)="updateField('lastName', $any($event.target).value)"
                            placeholder="Duka"
-                           class="h-12 px-4 border border-black/20 bg-white text-sm focus:outline-none focus:border-black transition-colors placeholder:text-gray-300" />
+                           class="h-12 px-4 border bg-white text-sm focus:outline-none focus:border-black transition-colors placeholder:text-gray-300"
+                           [class.border-red-400]="fieldError('lastName')"
+                           [class.border-black/20]="!fieldError('lastName')" />
+                    @if (fieldError('lastName')) {
+                      <span class="text-xs text-red-400 tracking-wide">Required</span>
+                    }
                   </div>
                 </div>
 
                 <!-- Email -->
                 <div class="flex flex-col gap-2">
-                  <label class="text-xs tracking-[0.2em] uppercase text-gray-500">Email Address</label>
+                  <label class="text-xs tracking-[0.2em] uppercase text-gray-500">Email Address <span class="text-red-400">*</span></label>
                   <input type="email" [value]="form().email"
                          (input)="updateField('email', $any($event.target).value)"
                          placeholder="you@example.com"
-                         class="h-12 px-4 border border-black/20 bg-white text-sm focus:outline-none focus:border-black transition-colors placeholder:text-gray-300" />
+                         class="h-12 px-4 border bg-white text-sm focus:outline-none focus:border-black transition-colors placeholder:text-gray-300"
+                         [class.border-red-400]="fieldError('email')"
+                         [class.border-black/20]="!fieldError('email')" />
+                  @if (fieldError('email')) {
+                    <span class="text-xs text-red-400 tracking-wide">Required</span>
+                  }
                 </div>
 
                 <!-- Phone -->
                 <div class="flex flex-col gap-2">
-                  <label class="text-xs tracking-[0.2em] uppercase text-gray-500">Phone Number</label>
+                  <label class="text-xs tracking-[0.2em] uppercase text-gray-500">Phone Number <span class="text-red-400">*</span></label>
                   <input type="tel" [value]="form().phone"
                          (input)="updateField('phone', $any($event.target).value)"
                          placeholder="+355 69 000 0000"
-                         class="h-12 px-4 border border-black/20 bg-white text-sm focus:outline-none focus:border-black transition-colors placeholder:text-gray-300" />
+                         class="h-12 px-4 border bg-white text-sm focus:outline-none focus:border-black transition-colors placeholder:text-gray-300"
+                         [class.border-red-400]="fieldError('phone')"
+                         [class.border-black/20]="!fieldError('phone')" />
+                  @if (fieldError('phone')) {
+                    <span class="text-xs text-red-400 tracking-wide">Required</span>
+                  }
                 </div>
 
                 <!-- Address -->
                 <div class="flex flex-col gap-2">
-                  <label class="text-xs tracking-[0.2em] uppercase text-gray-500">Street Address</label>
+                  <label class="text-xs tracking-[0.2em] uppercase text-gray-500">Street Address <span class="text-red-400">*</span></label>
                   <input type="text" [value]="form().address"
                          (input)="updateField('address', $any($event.target).value)"
                          placeholder="Rruga e Durrësit 14"
-                         class="h-12 px-4 border border-black/20 bg-white text-sm focus:outline-none focus:border-black transition-colors placeholder:text-gray-300" />
+                         class="h-12 px-4 border bg-white text-sm focus:outline-none focus:border-black transition-colors placeholder:text-gray-300"
+                         [class.border-red-400]="fieldError('address')"
+                         [class.border-black/20]="!fieldError('address')" />
+                  @if (fieldError('address')) {
+                    <span class="text-xs text-red-400 tracking-wide">Required</span>
+                  }
                 </div>
 
                 <!-- City / Postcode row -->
                 <div class="grid grid-cols-2 gap-4">
                   <div class="flex flex-col gap-2">
-                    <label class="text-xs tracking-[0.2em] uppercase text-gray-500">City</label>
+                    <label class="text-xs tracking-[0.2em] uppercase text-gray-500">City <span class="text-red-400">*</span></label>
                     <input type="text" [value]="form().city"
                            (input)="updateField('city', $any($event.target).value)"
                            placeholder="Tirana"
-                           class="h-12 px-4 border border-black/20 bg-white text-sm focus:outline-none focus:border-black transition-colors placeholder:text-gray-300" />
+                           class="h-12 px-4 border bg-white text-sm focus:outline-none focus:border-black transition-colors placeholder:text-gray-300"
+                           [class.border-red-400]="fieldError('city')"
+                           [class.border-black/20]="!fieldError('city')" />
+                    @if (fieldError('city')) {
+                      <span class="text-xs text-red-400 tracking-wide">Required</span>
+                    }
                   </div>
                   <div class="flex flex-col gap-2">
-                    <label class="text-xs tracking-[0.2em] uppercase text-gray-500">Postcode</label>
+                    <label class="text-xs tracking-[0.2em] uppercase text-gray-500">Postcode <span class="text-red-400">*</span></label>
                     <input type="text" [value]="form().postcode"
                            (input)="updateField('postcode', $any($event.target).value)"
                            placeholder="1001"
-                           class="h-12 px-4 border border-black/20 bg-white text-sm focus:outline-none focus:border-black transition-colors placeholder:text-gray-300" />
+                           class="h-12 px-4 border bg-white text-sm focus:outline-none focus:border-black transition-colors placeholder:text-gray-300"
+                           [class.border-red-400]="fieldError('postcode')"
+                           [class.border-black/20]="!fieldError('postcode')" />
+                    @if (fieldError('postcode')) {
+                      <span class="text-xs text-red-400 tracking-wide">Required</span>
+                    }
                   </div>
                 </div>
 
                 <!-- Country -->
                 <div class="flex flex-col gap-2">
-                  <label class="text-xs tracking-[0.2em] uppercase text-gray-500">Country</label>
+                  <label class="text-xs tracking-[0.2em] uppercase text-gray-500">Country <span class="text-red-400">*</span></label>
                   <select [value]="form().country"
                           (change)="updateField('country', $any($event.target).value)"
-                          class="h-12 px-4 border border-black/20 bg-white text-sm focus:outline-none focus:border-black transition-colors appearance-none cursor-pointer"
+                          class="h-12 px-4 border bg-white text-sm focus:outline-none focus:border-black transition-colors appearance-none cursor-pointer"
+                          [class.border-red-400]="formTouched() && !form().country"
+                          [class.border-black/20]="!(formTouched() && !form().country)"
                           [class.text-gray-300]="!form().country"
                           [class.text-black]="form().country">
                     <option value="" disabled selected>Select country</option>
@@ -101,6 +138,9 @@
                       <option [value]="c">{{ c }}</option>
                     }
                   </select>
+                  @if (formTouched() && !form().country) {
+                    <span class="text-xs text-red-400 tracking-wide">Required</span>
+                  }
                 </div>
               </div>
 
@@ -135,8 +175,13 @@
                 </div>
               </div>
 
+              @if (formTouched() && !shippingValid()) {
+                <p class="mt-8 text-xs text-red-400 tracking-wide text-center">Please fill in all required fields before continuing.</p>
+              }
               <button (click)="proceedToPayment()"
-                      class="w-full mt-10 py-5 bg-black text-white text-sm tracking-[0.2em] uppercase hover:bg-black/80 transition-colors duration-300">
+                      class="w-full mt-4 py-5 bg-black text-white text-sm tracking-[0.2em] uppercase transition-colors duration-300"
+                      [class.hover:bg-black/80]="shippingValid()"
+                      [class.opacity-60]="formTouched() && !shippingValid()">
                 Continue to Payment
               </button>
             </div>
