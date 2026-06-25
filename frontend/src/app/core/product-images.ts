@@ -55,6 +55,15 @@ export function productImages(slug: string, apiImage: string | null): string[] {
   return PRODUCT_IMAGES[slug] ?? [PLACEHOLDER_IMAGE];
 }
 
+function toTitleCase(s: string): string {
+  return s.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+}
+
+export function getColorHex(colorName: string): string {
+  const raw = colorName.trim();
+  return COLOR_HEX[raw] ?? COLOR_HEX[toTitleCase(raw)] ?? '#888888';
+}
+
 export const COLOR_HEX: Record<string, string> = {
   'Ivory':       '#F5F0E8',
   'Blush':       '#E8C4B8',

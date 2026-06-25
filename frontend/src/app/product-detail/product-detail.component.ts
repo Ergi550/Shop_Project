@@ -8,7 +8,7 @@ import { ProductService } from '../core/services/product.service';
 import { CartService } from '../core/services/cart.service';
 import { WishlistService } from '../core/services/wishlist.service';
 import { Product } from '../core/models';
-import { productImages, COLOR_HEX, PLACEHOLDER_IMAGE } from '../core/product-images';
+import { productImages, getColorHex, PLACEHOLDER_IMAGE } from '../core/product-images';
 import { SizeGuideService } from '../core/services/size-guide.service';
 
 interface DisplayColor {
@@ -58,6 +58,8 @@ export class ProductDetailComponent {
   activeTab = signal<'description' | 'materials' | 'care'>('description');
   addedToCart = signal(false);
   addedToWishlist = signal(false);
+  sizeError = signal(false);
+  colorError = signal(false);
 
   images = computed(() => {
     const p = this.product();
@@ -70,14 +72,14 @@ export class ProductDetailComponent {
   sizes = computed<string[]>(() => {
     const p = this.product();
     if (!p) return [];
-    return [...new Set(p.variants.map(v => v.size))];
+    return [...new Set(p.variants.map(v => v.size.trim()).filter(s => s.length > 0))];
   });
 
   colors = computed<DisplayColor[]>(() => {
     const p = this.product();
     if (!p) return [];
-    const unique = [...new Set(p.variants.map(v => v.color))];
-    return unique.map(name => ({ name, hex: COLOR_HEX[name] ?? '#888888' }));
+    const unique = [...new Set(p.variants.map(v => v.color.trim()).filter(c => c.length > 0))];
+    return unique.map(name => ({ name, hex: getColorHex(name) }));
   });
 
   isInWishlist = computed(() => {
@@ -89,26 +91,28 @@ export class ProductDetailComponent {
     const p = this.product();
     if (!p) return false;
     const color = this.selectedColor();
-    if (!color) return p.variants.some(v => v.size === size && v.stock > 0);
-    return p.variants.some(v => v.size === size && v.color === color && v.stock > 0);
+    if (!color) return p.variants.some(v => v.size.trim() === size && v.stock > 0);
+    return p.variants.some(v => v.size.trim() === size && v.color.trim() === color && v.stock > 0);
   }
 
   isColorAvailable(color: string): boolean {
     const p = this.product();
     if (!p) return false;
     const size = this.selectedSize();
-    if (!size) return p.variants.some(v => v.color === color && v.stock > 0);
-    return p.variants.some(v => v.color === color && v.size === size && v.stock > 0);
+    if (!size) return p.variants.some(v => v.color.trim() === color && v.stock > 0);
+    return p.variants.some(v => v.color.trim() === color && v.size.trim() === size && v.stock > 0);
   }
 
   selectSize(size: string): void {
     if (!this.isSizeAvailable(size)) return;
     this.selectedSize.set(this.selectedSize() === size ? null : size);
+    this.sizeError.set(false);
   }
 
   selectColor(color: string): void {
     if (!this.isColorAvailable(color)) return;
     this.selectedColor.set(this.selectedColor() === color ? null : color);
+    this.colorError.set(false);
   }
 
   decrement(): void {
@@ -122,11 +126,22 @@ export class ProductDetailComponent {
   addToCart(): void {
     const p = this.product();
     if (!p) return;
-    const size = this.selectedSize() ?? this.sizes()[0];
-    const color = this.selectedColor() ?? this.colors()[0]?.name ?? '';
 
-    const variant = p.variants.find(v => v.size === size && v.color === color)
-      ?? p.variants.find(v => v.size === size)
+    if (!this.selectedSize()) {
+      this.sizeError.set(true);
+    }
+    if (this.colors().length > 0 && !this.selectedColor()) {
+      this.colorError.set(true);
+    }
+    if (!this.selectedSize() || (this.colors().length > 0 && !this.selectedColor())) {
+      return;
+    }
+
+    const size = this.selectedSize()!;
+    const color = this.selectedColor() ?? '';
+
+    const variant = p.variants.find(v => v.size.trim() === size && v.color.trim() === color)
+      ?? p.variants.find(v => v.size.trim() === size)
       ?? p.variants[0];
 
     if (!variant) return;

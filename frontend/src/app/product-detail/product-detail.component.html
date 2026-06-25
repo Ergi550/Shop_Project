@@ -94,7 +94,7 @@
 
     <!-- ===================== MAIN PRODUCT SECTION ===================== -->
     <div class="px-4 md:px-8 pb-16 md:pb-24 max-w-[1440px] mx-auto">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16">
+      <div class="grid grid-cols-1 lg:grid-cols-[5fr_6fr] gap-8 md:gap-16">
 
         <!-- LEFT: Images -->
         <div>
@@ -127,8 +127,11 @@
           @if (colors().length > 0) {
             <div class="mb-6 md:mb-8">
               <div class="flex items-center gap-2 mb-3 md:mb-4">
-                <span class="text-xs tracking-[0.2em] uppercase">Colour</span>
-                @if (selectedColor()) {
+                <span class="text-xs tracking-[0.2em] uppercase"
+                      [class.text-red-500]="colorError()">Colour</span>
+                @if (colorError()) {
+                  <span class="text-xs text-red-500 normal-case tracking-normal font-normal">— Please select a colour</span>
+                } @else if (selectedColor()) {
                   <span class="text-xs text-gray-400">— {{ selectedColor() }}</span>
                 }
               </div>
@@ -139,7 +142,8 @@
                     [title]="color.name"
                     class="w-8 h-8 rounded-full border-2 transition-all duration-200"
                     [class.border-black]="selectedColor() === color.name"
-                    [class.border-transparent]="selectedColor() !== color.name"
+                    [class.border-red-400]="colorError() && selectedColor() !== color.name && isColorAvailable(color.name)"
+                    [class.border-transparent]="!colorError() && selectedColor() !== color.name"
                     [class.opacity-30]="!isColorAvailable(color.name)"
                     [class.cursor-not-allowed]="!isColorAvailable(color.name)"
                     [style.background-color]="color.hex"
@@ -153,7 +157,10 @@
           <!-- Size selector -->
           <div class="mb-6 md:mb-8">
             <div class="flex items-center justify-between mb-3 md:mb-4">
-              <span class="text-xs tracking-[0.2em] uppercase">Size</span>
+              <span class="text-xs tracking-[0.2em] uppercase"
+                    [class.text-red-500]="sizeError()">Size
+                @if (sizeError()) { <span class="ml-1 normal-case tracking-normal font-normal">— Please select a size</span> }
+              </span>
               <button (click)="sizeGuide.open()" class="text-xs tracking-wider text-gray-400 underline hover:text-black transition-colors">
                 Size Guide
               </button>
@@ -168,7 +175,8 @@
                   [class.border-black]="selectedSize() === size"
                   [class.bg-white]="selectedSize() !== size"
                   [class.text-black]="selectedSize() !== size"
-                  [class.border-black\/20]="selectedSize() !== size && isSizeAvailable(size)"
+                  [class.border-red-400]="sizeError() && selectedSize() !== size && isSizeAvailable(size)"
+                  [class.border-black\/20]="!sizeError() && selectedSize() !== size && isSizeAvailable(size)"
                   [class.opacity-30]="!isSizeAvailable(size)"
                   [class.cursor-not-allowed]="!isSizeAvailable(size)"
                   [class.line-through]="!isSizeAvailable(size)">
