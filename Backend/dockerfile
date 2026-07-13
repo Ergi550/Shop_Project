@@ -1,25 +1,15 @@
-# Start from an official Python image (slim = smaller, fewer extras)
 FROM python:3.13-slim
 
-# Don't write .pyc files, and don't buffer stdout (logs appear immediately)
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Where our code lives inside the container
 WORKDIR /app
 
-# Install dependencies FIRST, separately from code.
-# This layer is cached and only rebuilds when requirements.txt changes,
-# so day-to-day code edits don't trigger a full reinstall.
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Now copy the rest of your backend code in
 COPY . .
 
-# Document the port the app uses (Django dev server default)
 EXPOSE 8000
 
-# How to start the app when a container runs
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2"]
