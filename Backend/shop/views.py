@@ -1,15 +1,58 @@
+import random
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.conf import settings as django_settings
+from django.utils import timezone
 from django.db import transaction
 from django.db.models import Count, OuterRef, Q, Subquery
-from .models import Category, Product, ProductVariant, Order, OrderItem
+from .models import Category, Product, ProductVariant, Order, OrderItem, EmailVerificationCode
 from .serializers import (
     CategorySerializer,
     ProductSerializer,
     OrderSerializer,
 )
+
+
+def _send_code(user):
+    """Generate a fresh 6-digit code, save it, and email it."""
+    code = str(random.randint(100000, 999999))
+    EmailVerificationCode.objects.update_or_create(
+        user=user,
+        defaults={'code': code, 'created_at': timezone.now()},
+    )
+    send_mail(
+        subject="Your verification code — Geri's",
+        message=(
+            f"Hi {user.first_name or user.email},\n\n"
+            f"Your verification code is:\n\n"
+            f"  {code}\n\n"
+            f"Enter this code on the verification page. It expires in 15 minutes.\n\n"
+            f"Geri's"
+        ),
+        from_email=django_settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[user.email],
+        fail_silently=False,
+    )
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    """Returns a clearer error when the account exists but is not yet verified."""
+    def post(self, request, *args, **kwargs):
+        username = request.data.get('username', '')
+        try:
+            user = User.objects.get(username=username)
+            if not user.is_active:
+                return Response(
+                    {'detail': 'Please verify your email before signing in.'},
+                    status=403,
+                )
+        except User.DoesNotExist:
+            pass
+        return super().post(request, *args, **kwargs)
 
 
 
@@ -106,22 +149,75 @@ class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        username = request.data.get('username') or request.data.get('email')
-        email = request.data.get('email', '')
-        password = request.data.get('password', '')
+        username   = request.data.get('username') or request.data.get('email')
+        email      = request.data.get('email', '')
+        password   = request.data.get('password', '')
         first_name = request.data.get('first_name', '')
-        last_name = request.data.get('last_name', '')
+        last_name  = request.data.get('last_name', '')
 
         if not username or not password:
             return Response({'detail': 'Username and password required.'}, status=400)
         if User.objects.filter(username=username).exists():
-            return Response({'detail': 'Username already taken.'}, status=400)
+            return Response({'detail': 'An account with this email already exists.'}, status=400)
 
         user = User.objects.create_user(
             username=username, email=email, password=password,
             first_name=first_name, last_name=last_name,
+            is_active=False,
         )
-        return Response({'id': user.id, 'username': user.username, 'email': user.email}, status=201)
+        _send_code(user)
+
+        return Response({'detail': 'Account created. Check your email for the verification code.'}, status=201)
+
+
+class VerifyEmailView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email', '').strip()
+        code  = request.data.get('code', '').strip()
+
+        try:
+            user = User.objects.get(username=email)
+        except User.DoesNotExist:
+            return Response({'detail': 'No account found with this email.'}, status=400)
+
+        if user.is_active:
+            return Response({'detail': 'Email already verified. You can sign in.'}, status=200)
+
+        try:
+            record = user.verification_code
+        except EmailVerificationCode.DoesNotExist:
+            return Response({'detail': 'No verification code found. Please register again.'}, status=400)
+
+        if record.is_expired():
+            return Response({'detail': 'Code has expired. Please request a new one.'}, status=400)
+
+        if record.code != code:
+            return Response({'detail': 'Incorrect code. Please try again.'}, status=400)
+
+        user.is_active = True
+        user.save(update_fields=['is_active'])
+        record.delete()
+
+        return Response({'detail': 'Email verified. You can now sign in.'}, status=200)
+
+
+class ResendVerificationCodeView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email', '').strip()
+        try:
+            user = User.objects.get(username=email)
+        except User.DoesNotExist:
+            return Response({'detail': 'No account found with this email.'}, status=400)
+
+        if user.is_active:
+            return Response({'detail': 'This account is already verified.'}, status=400)
+
+        _send_code(user)
+        return Response({'detail': 'A new code has been sent to your email.'}, status=200)
 
 
 class MeView(APIView):

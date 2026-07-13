@@ -49,8 +49,7 @@ export class RegisterComponent {
     }).subscribe({
       next: () => {
         this.loading.set(false);
-        this.submitted.set(true);
-        setTimeout(() => this.router.navigate(['/login']), 2000);
+        this.router.navigate(['/verify-email'], { queryParams: { email: this.email() } });
       },
       error: (err) => {
         this.loading.set(false);

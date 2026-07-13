@@ -157,29 +157,6 @@
               </a>
             </p>
           </div>
-        } @else {
-          <!-- Success state -->
-          <div class="text-center py-8">
-            <div class="w-16 h-16 rounded-full border-2 mx-auto mb-6 flex items-center justify-center"
-                 style="border-color: #C9A962;">
-              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="#C9A962" stroke-width="1.5">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
-            <h2 class="text-3xl tracking-wide mb-3" style="font-family: Cormorant, serif; font-weight: 400;">
-              Welcome to Aurelia
-            </h2>
-            <p class="text-sm text-gray-400 tracking-wider mb-2">
-              {{ firstName() || 'Your account' }} has been created.
-            </p>
-            <p class="text-xs text-gray-400 tracking-wider mb-8">
-              Enjoy complimentary shipping on your first order.
-            </p>
-            <a routerLink="/shop"
-               class="inline-block text-xs tracking-[0.25em] uppercase border-b border-black pb-1 hover:opacity-60 transition-opacity">
-              Start Shopping
-            </a>
-          </div>
         }
 
       </div>

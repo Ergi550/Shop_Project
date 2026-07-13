@@ -8,6 +8,7 @@ import { CheckoutComponent } from './checkout/checkout.component';
 import { OrderConfirmationComponent } from './order-confirmation/order-confirmation.component';
 import { LoginComponent } from './auth/login.component';
 import { RegisterComponent } from './auth/register.component';
+import { VerifyEmailComponent } from './auth/verify-email.component';
 import { MyOrdersComponent } from './orders/my-orders.component';
 import { AdminComponent } from './admin/admin.component';
 import { AdminDashboardComponent } from './admin/dashboard/admin-dashboard.component';
@@ -41,5 +42,6 @@ export const routes: Routes = [
   },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  { path: 'verify-email', component: VerifyEmailComponent },
   { path: '**', redirectTo: '' },
 ];

@@ -39,6 +39,24 @@ class ProductVariant(models.Model):
   def __str__(self):
    return  f"{self.product.name} — {self.size}/{self.color}"
 from django.conf import settings
+from django.utils import timezone
+
+
+class EmailVerificationCode(models.Model):
+    user       = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='verification_code',
+    )
+    code       = models.CharField(max_length=6)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def is_expired(self):
+        return (timezone.now() - self.created_at).total_seconds() > 900  # 15 min
+
+    def __str__(self):
+        return f"Code for {self.user.email}"
+
 
 class Order(models.Model):
     STATUS_CHOICES = [

@@ -52,11 +52,19 @@ export class AuthService {
     );
   }
 
-  register(payload: RegisterPayload): Observable<AuthUser> {
-    return this.http.post<AuthUser>(`${this.api}/auth/register/`, {
+  register(payload: RegisterPayload): Observable<{ detail: string }> {
+    return this.http.post<{ detail: string }>(`${this.api}/auth/register/`, {
       ...payload,
       username: payload.email,
     });
+  }
+
+  verifyEmail(email: string, code: string): Observable<{ detail: string }> {
+    return this.http.post<{ detail: string }>(`${this.api}/auth/verify-email/`, { email, code });
+  }
+
+  resendCode(email: string): Observable<{ detail: string }> {
+    return this.http.post<{ detail: string }>(`${this.api}/auth/resend-code/`, { email });
   }
 
   fetchMe(): void {

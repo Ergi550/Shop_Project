@@ -39,9 +39,13 @@ export class LoginComponent {
           setTimeout(() => this.router.navigate(['/']), 1500);
         }
       },
-      error: () => {
+      error: (err) => {
         this.loading.set(false);
-        this.error.set('Invalid email or password.');
+        if (err?.status === 403) {
+          this.error.set(err?.error?.detail ?? 'Please verify your email before signing in.');
+        } else {
+          this.error.set('Invalid email or password.');
+        }
       },
     });
   }
