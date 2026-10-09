@@ -1,0 +1,19 @@
+$kind: http-request
+name: List Orders - Filter by Status
+method: GET
+url: '{{base_url}}/api/admin/orders/?status=pending'
+order: 4000
+queryParams:
+  - key: status
+    value: pending
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("All returned orders have pending status", function () {
+          const json = pm.response.json();
+          json.forEach(order => pm.expect(order.status).to.equal("pending"));
+      });

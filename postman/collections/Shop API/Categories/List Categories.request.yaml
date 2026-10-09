@@ -1,0 +1,35 @@
+$kind: http-request
+name: List Categories
+method: GET
+url: '{{base_url}}/api/categories/'
+order: 1000
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("Response is an array", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.be.an("array");
+      });
+      pm.test("Each category has required fields", function () {
+          const json = pm.response.json();
+          if (json.length > 0) {
+              const c = json[0];
+              pm.expect(c).to.have.property("id");
+              pm.expect(c).to.have.property("name");
+              pm.expect(c).to.have.property("slug");
+              pm.expect(c).to.have.property("product_count");
+              // Save for filter test
+              pm.environment.set("category_id", c.id);
+              pm.environment.set("category_slug", c.slug);
+          }
+      });
+      pm.test("product_count is a non-negative number", function () {
+          const json = pm.response.json();
+          json.forEach(c => pm.expect(c.product_count).to.be.at.least(0));
+      });

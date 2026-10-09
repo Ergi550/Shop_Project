@@ -1,0 +1,35 @@
+$kind: http-request
+name: Create Order - Invalid Variant
+method: POST
+url: '{{base_url}}/api/orders/create/'
+order: 5000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "shipping_full_name": "Test User",
+      "shipping_address": "123 Main Street",
+      "shipping_city": "London",
+      "shipping_postcode": "SW1A 1AA",
+      "shipping_country": "UK",
+      "items": [
+        {
+          "variant": 999999,
+          "quantity": 1
+        }
+      ]
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 400 for invalid variant", function () {
+          pm.response.to.have.status(400);
+      });
+      pm.test("Error mentions variant not found", function () {
+          const json = pm.response.json();
+          pm.expect(json.detail).to.include("not found");
+      });

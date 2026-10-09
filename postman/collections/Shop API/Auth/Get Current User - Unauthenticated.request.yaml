@@ -1,0 +1,14 @@
+$kind: http-request
+name: Get Current User - Unauthenticated
+method: GET
+url: '{{base_url}}/api/auth/me/'
+order: 8000
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 401 when not authenticated", function () {
+          pm.response.to.have.status(401);
+      });

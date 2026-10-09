@@ -1,0 +1,14 @@
+$kind: http-request
+name: Get Dashboard - Non-Admin
+method: GET
+url: '{{base_url}}/api/admin/dashboard/'
+order: 2000
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 401 or 403 for non-admin", function () {
+          pm.expect(pm.response.code).to.be.oneOf([401, 403]);
+      });

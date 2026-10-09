@@ -1,0 +1,51 @@
+$kind: http-request
+name: Create Order
+method: POST
+url: '{{base_url}}/api/orders/create/'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "shipping_full_name": "Test User",
+      "shipping_address": "123 Main Street",
+      "shipping_city": "London",
+      "shipping_postcode": "SW1A 1AA",
+      "shipping_country": "UK",
+      "shipping_phone": "+44 7700 900000",
+      "items": [
+        {
+          "variant": {{variant_id}},
+          "quantity": 1
+        }
+      ]
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 201 Created", function () {
+          pm.response.to.have.status(201);
+      });
+      pm.test("Order has id and status pending", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("id");
+          pm.expect(json.status).to.equal("pending");
+          pm.environment.set("order_id", json.id);
+      });
+      pm.test("Order has items", function () {
+          const json = pm.response.json();
+          pm.expect(json.items).to.be.an("array").with.length.above(0);
+      });
+      pm.test("Order total is positive", function () {
+          const json = pm.response.json();
+          pm.expect(parseFloat(json.total)).to.be.above(0);
+      });
+      pm.test("Shipping details are saved", function () {
+          const json = pm.response.json();
+          pm.expect(json.shipping_full_name).to.equal("Test User");
+          pm.expect(json.shipping_city).to.equal("London");
+      });

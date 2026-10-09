@@ -1,0 +1,34 @@
+$kind: http-request
+name: Login - Get Token
+method: POST
+url: '{{base_url}}/api/auth/token/'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "username": "testuser",
+      "password": "TestPass123!"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("Response contains access and refresh tokens", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("access");
+          pm.expect(json).to.have.property("refresh");
+      });
+      pm.test("Save tokens to environment", function () {
+          const json = pm.response.json();
+          pm.environment.set("access_token", json.access);
+          pm.environment.set("refresh_token", json.refresh);
+      });

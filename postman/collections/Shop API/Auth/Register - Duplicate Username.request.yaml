@@ -1,0 +1,29 @@
+$kind: http-request
+name: Register - Duplicate Username
+method: POST
+url: '{{base_url}}/api/auth/register/'
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "username": "testuser",
+      "email": "testuser@example.com",
+      "password": "TestPass123!"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 400 for duplicate username", function () {
+          pm.response.to.have.status(400);
+      });
+      pm.test("Error message mentions username taken", function () {
+          const json = pm.response.json();
+          pm.expect(json.detail).to.include("already taken");
+      });

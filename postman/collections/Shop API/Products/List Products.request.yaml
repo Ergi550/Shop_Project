@@ -1,0 +1,43 @@
+$kind: http-request
+name: List Products
+method: GET
+url: '{{base_url}}/api/products/'
+order: 1000
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("Response is an array", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.be.an("array");
+      });
+      pm.test("Each product has required fields", function () {
+          const json = pm.response.json();
+          if (json.length > 0) {
+              const p = json[0];
+              pm.expect(p).to.have.property("id");
+              pm.expect(p).to.have.property("name");
+              pm.expect(p).to.have.property("slug");
+              pm.expect(p).to.have.property("price");
+              pm.expect(p).to.have.property("category");
+              pm.expect(p).to.have.property("variants");
+              // Save first product slug for later tests
+              pm.environment.set("product_slug", p.slug);
+              pm.environment.set("product_id", p.id);
+              if (p.variants && p.variants.length > 0) {
+                  pm.environment.set("variant_id", p.variants[0].id);
+              }
+          }
+      });
+      pm.test("Only available products are returned", function () {
+          const json = pm.response.json();
+          json.forEach(p => pm.expect(p.available).to.be.true);
+      });
+      pm.test("Response time is under 2000ms", function () {
+          pm.expect(pm.response.responseTime).to.be.below(2000);
+      });

@@ -1,0 +1,14 @@
+$kind: http-request
+name: Get Product - Not Found
+method: GET
+url: '{{base_url}}/api/products/non-existent-product-slug/'
+order: 4000
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 404 for unknown slug", function () {
+          pm.response.to.have.status(404);
+      });

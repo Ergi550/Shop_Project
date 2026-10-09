@@ -1,0 +1,26 @@
+$kind: http-request
+name: Get Dashboard
+method: GET
+url: '{{base_url}}/api/admin/dashboard/'
+order: 1000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 200 OK for admin", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("Dashboard has summary fields", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("total_products");
+          pm.expect(json).to.have.property("total_orders");
+          pm.expect(json).to.have.property("orders_by_status");
+          pm.expect(json).to.have.property("recent_orders");
+          pm.expect(json).to.have.property("low_stock_variants");
+      });
+      pm.test("orders_by_status has all statuses", function () {
+          const s = pm.response.json().orders_by_status;
+          ["pending","paid","shipped","delivered","cancelled"].forEach(status => {
+              pm.expect(s).to.have.property(status);
+          });
+      });

@@ -1,0 +1,32 @@
+$kind: http-request
+name: Get Product Detail
+method: GET
+url: '{{base_url}}/api/products/{{product_slug}}/'
+order: 3000
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("Product has all detail fields", function () {
+          const json = pm.response.json();
+          pm.expect(json).to.have.property("id");
+          pm.expect(json).to.have.property("name");
+          pm.expect(json).to.have.property("slug");
+          pm.expect(json).to.have.property("price");
+          pm.expect(json).to.have.property("description");
+          pm.expect(json).to.have.property("variants");
+          pm.expect(json).to.have.property("category");
+      });
+      pm.test("Variants is an array", function () {
+          const json = pm.response.json();
+          pm.expect(json.variants).to.be.an("array");
+      });
+      pm.test("Price is a valid number", function () {
+          const json = pm.response.json();
+          pm.expect(parseFloat(json.price)).to.be.above(0);
+      });

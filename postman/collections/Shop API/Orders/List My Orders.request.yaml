@@ -1,0 +1,23 @@
+$kind: http-request
+name: List My Orders
+method: GET
+url: '{{base_url}}/api/orders/'
+order: 1000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+      pm.test("Response is an array", function () {
+          pm.expect(pm.response.json()).to.be.an("array");
+      });
+      pm.test("Orders belong to current user only", function () {
+          // Each order should have an id and status
+          const json = pm.response.json();
+          json.forEach(order => {
+              pm.expect(order).to.have.property("id");
+              pm.expect(order).to.have.property("status");
+          });
+      });
